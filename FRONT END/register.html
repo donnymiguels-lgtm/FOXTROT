@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - OrgHub</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="auth.css">
+
+  <!-- ICONS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="auth-body">
+
+  <div class="auth-container">
+
+    <!-- HEADER -->
+    <div class="auth-header">
+      <div class="logo-icon">
+        <i class="fa-solid fa-book"></i>
+      </div>
+      <h1>Join OrgHub</h1>
+      <p>Create your account to get started</p>
+    </div>
+
+    <!-- CARD -->
+    <div class="auth-card">
+      <h2>Create Account</h2>
+
+      <!-- NAME ROW -->
+      <div class="row">
+
+        <div>
+          <label>First Name</label>
+          <div class="input-group">
+            <span class="input-icon"><i class="fa fa-user"></i></span>
+            <input type="text" id="firstName" placeholder="John">
+          </div>
+        </div>
+
+        <div>
+          <label>Last Name</label>
+          <div class="input-group">
+            <span class="input-icon"><i class="fa fa-user"></i></span>
+            <input type="text" id="lastName" placeholder="Doe">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- EMAIL -->
+      <label>Email Address</label>
+      <div class="input-group">
+        <span class="input-icon"><i class="fa fa-envelope"></i></span>
+        <input type="email" id="email" placeholder="student@university.edu">
+      </div>
+
+      <!-- PHONE + ID -->
+      <div class="row">
+
+        <div>
+          <label>Phone Number</label>
+          <div class="input-group">
+            <span class="input-icon"><i class="fa fa-phone"></i></span>
+            <input
+type="text"
+id="phone"
+placeholder="(555) 123-4567"
+>
+          </div>
+        </div>
+
+        <div>
+          <label>Student ID</label>
+          <div class="input-group">
+            <span class="input-icon"><i class="fa fa-id-card"></i></span>
+            <input
+type="text"
+id="studentId"
+placeholder="STU123456"
+>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PASSWORD -->
+      <label>Password</label>
+      <div class="input-group">
+        <span class="input-icon"><i class="fa fa-lock"></i></span>
+        <input type="password" id="password" placeholder="Create a strong password">
+      </div>
+
+      <!-- CONFIRM PASSWORD -->
+       <label>Confirm Password</label>
+      <div class="input-group">
+        <span class="input-icon"><i class="fa fa-lock"></i></span>
+        <input
+type="password"
+id="confirmPassword"
+placeholder="Re-enter your password"
+>
+      </div>
+
+      <!-- TERMS -->
+      <label class="checkbox">
+        <input
+type="checkbox"
+id="terms"
+>
+        <span>I agree to the Terms of Service and Privacy Policy</span>
+      </label>
+
+      <!-- BUTTON -->
+      <button class="btn full" id="registerButton">Create Account</button>
+
+      <!-- SWITCH -->
+      <p class="switch">
+        Already have an account? <a href="login.html">Sign In</a>
+      </p>
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+<script>
+
+const registerButton =
+document.getElementById(
+"registerButton"
+);
+
+registerButton.addEventListener(
+
+"click",
+
+async(e)=>{
+
+e.preventDefault();
+
+try{
+
+const first_name =
+document.getElementById(
+"firstName"
+).value;
+
+const last_name =
+document.getElementById(
+"lastName"
+).value;
+
+const email =
+document.getElementById(
+"email"
+).value;
+
+const password =
+document.getElementById(
+"password"
+).value;
+
+const confirmPassword =
+document.getElementById(
+"confirmPassword"
+).value;
+
+const phone =
+document.getElementById(
+"phone"
+).value;
+
+const student_id =
+document.getElementById(
+"studentId"
+).value;
+
+const terms =
+document.getElementById(
+"terms"
+).checked;
+
+if(
+
+!first_name ||
+!last_name ||
+!email ||
+!password ||
+!student_id
+
+){
+
+alert(
+"Please complete all required fields"
+);
+
+return;
+
+}
+
+if(password!==confirmPassword){
+
+alert(
+"Passwords do not match"
+);
+
+return;
+
+}
+
+if(!terms){
+
+alert(
+"You must accept terms"
+);
+
+return;
+
+}
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/auth/register",
+
+{
+
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:JSON.stringify({
+
+first_name,
+last_name,
+email,
+password,
+phone,
+student_id
+
+})
+
+}
+
+);
+
+const data =
+await response.json();
+
+if(data.message){
+
+alert(
+data.message
+);
+
+window.location.href=
+"login.html";
+
+}
+
+else{
+
+alert(
+
+data.error ||
+
+"Registration failed"
+
+);
+
+}
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(
+"Registration Failed"
+);
+
+}
+
+}
+
+);
+
+</script>
+
+</body>
+</html>

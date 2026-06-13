@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Organization Management</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<header class="navbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="admin.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="admin-organizations.html" class="active">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="admin-events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge admin-badge" id="roleBadge">
+      <i class="fa-solid fa-user-shield"></i>
+      <span id="roleText">Admin</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+  </div>
+</header>
+
+<main class="container" id="adminOrganizationsPage">
+
+  <h1>Organization Management</h1>
+  <p class="subtitle">Review and manage all student organizations.</p>
+
+  <section class="card">
+
+    <div class="org-controls" id="organizationControls">
+
+      <div class="tabs">
+
+        <button class="tab active" data-status="pending" id="pendingTab">
+          Pending (<span id="pendingCount">0</span>)
+        </button>
+
+        <button class="tab" data-status="approved" id="approvedTab">
+          Approved (<span id="approvedCount">0</span>)
+        </button>
+
+        <button class="tab" data-status="rejected" id="rejectedTab">
+          Rejected (<span id="rejectedCount">0</span>)
+        </button>
+
+      </div>
+
+      <div class="search-box">
+        <i class="fa-solid fa-search"></i>
+        <input
+          type="text"
+          id="searchOrgInput"
+          placeholder="Search organizations..."
+        >
+      </div>
+
+    </div>
+
+    <div class="table-wrapper">
+
+      <table class="org-table">
+
+        <thead>
+          <tr>
+            <th>Organization Name</th>
+            <th>Category</th>
+            <th>Submitted By</th>
+            <th>Date</th>
+            <th>Members</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="orgTableBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+const token =
+localStorage.getItem("token");
+
+let currentStatus =
+"pending";
+
+let currentRequests =
+[];
+
+document
+.querySelectorAll(".tab")
+.forEach(tab=>{
+
+tab.addEventListener("click",()=>{
+
+document
+.querySelectorAll(".tab")
+.forEach(t=>
+t.classList.remove("active")
+);
+
+tab.classList.add("active");
+
+currentStatus =
+tab.dataset.status;
+
+loadRequests();
+
+});
+
+});
+
+document
+.getElementById("searchOrgInput")
+.addEventListener("input",()=>{
+
+renderRequests();
+
+});
+
+async function loadRequests(){
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/organizations/requests?status=${currentStatus}`,
+{
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+);
+
+currentRequests =
+await response.json();
+
+await updateCounts();
+
+renderRequests();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Failed loading organization requests");
+
+}
+
+}
+
+function renderRequests(){
+
+const searchValue =
+document
+.getElementById("searchOrgInput")
+.value
+.toLowerCase();
+
+const body =
+document.getElementById("orgTableBody");
+
+body.innerHTML =
+"";
+
+const filteredRequests =
+currentRequests.filter(request=>{
+
+const name =
+String(request.organization_name || "")
+.toLowerCase();
+
+const category =
+String(request.category || "")
+.toLowerCase();
+
+const submittedBy =
+String(request.submitted_by || "")
+.toLowerCase();
+
+const status =
+String(request.status || "")
+.toLowerCase();
+
+return (
+name.includes(searchValue)
+||
+category.includes(searchValue)
+||
+submittedBy.includes(searchValue)
+||
+status.includes(searchValue)
+);
+
+});
+
+if(
+!Array.isArray(filteredRequests)
+||
+filteredRequests.length===0
+){
+
+body.innerHTML =
+`
+<tr>
+  <td colspan="7">
+    No organizations found.
+  </td>
+</tr>
+`;
+
+return;
+
+}
+
+filteredRequests.forEach(request=>{
+
+body.innerHTML +=
+`
+<tr>
+
+  <td>
+    <i class="fa-solid fa-building"></i>
+    ${request.organization_name}
+  </td>
+
+  <td>
+    <span class="tag">
+      ${request.category || "General"}
+    </span>
+  </td>
+
+  <td>
+    ${request.first_name || ""} ${request.last_name || ""}
+  </td>
+
+  <td>
+    ${new Date(request.submitted_at).toLocaleDateString()}
+  </td>
+
+  <td>
+    0
+  </td>
+
+  <td>
+    <span class="status ${request.status}">
+      ${request.status}
+    </span>
+  </td>
+
+  <td>
+
+<button
+class="link-btn"
+onclick="
+window.location.href=
+'admin-org-request-details.html?request_id=${request.request_id}'
+"
+>
+<i class="fa-solid fa-eye"></i>
+Review
+</button>
+
+${
+request.status === "pending"
+?
+`
+<button
+class="btn approve"
+onclick="approveRequest(${request.request_id})"
+>
+<i class="fa-solid fa-check"></i>
+Approve
+</button>
+
+<button
+class="btn decline"
+onclick="rejectRequest(${request.request_id})"
+>
+<i class="fa-solid fa-xmark"></i>
+Reject
+</button>
+`
+:
+""
+}
+
+</td>
+
+</tr>
+`;
+
+});
+
+}
+
+async function updateCounts(){
+
+const statuses =
+[
+"pending",
+"approved",
+"rejected"
+];
+
+for(const status of statuses){
+
+const response =
+await fetch(
+`http://localhost:5000/api/organizations/requests?status=${status}`,
+{
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+);
+
+const data =
+await response.json();
+
+document.getElementById(
+`${status}Count`
+).textContent =
+Array.isArray(data)
+?
+data.length
+:
+0;
+
+}
+
+}
+
+async function approveRequest(id){
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/organizations/${id}/approve`,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadRequests();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Approval failed");
+
+}
+
+}
+
+async function rejectRequest(id){
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/organizations/${id}/reject`,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadRequests();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Rejection failed");
+
+}
+
+}
+
+loadRequests();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

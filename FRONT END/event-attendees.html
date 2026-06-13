@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Attendees - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+
+    <a href="index.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+    <a href="my-orgs.html">
+      <i class="fa-solid fa-user"></i>
+      <span>My Orgs</span>
+    </a>
+
+    <a href="my-events.html">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <span>My Events</span>
+    </a>
+
+    <a href="officer.html" id="officerPanelLink">
+      <i class="fa-solid fa-user-tie"></i>
+      <span>Officer Panel</span>
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge officer-badge" id="roleBadge">
+      <i class="fa-solid fa-user-tie"></i>
+      <span id="roleText">Student</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+  </div>
+
+</header>
+
+<main class="container">
+
+  <div class="page-header">
+    <div>
+      <h1>Event Attendees</h1>
+      <p class="subtitle">
+        Students registered for this event.
+      </p>
+    </div>
+
+    <a href="officer.html" class="btn outline">
+      Back to Officer Panel
+    </a>
+  </div>
+
+  <section class="card">
+
+    <h3>Attendance Summary</h3>
+
+    <p id="attendanceSummary">
+      Loading...
+    </p>
+
+  </section>
+
+  <section class="card">
+
+    <h3>Registered Students</h3>
+
+    <div
+      class="empty-state"
+      id="emptyAttendees"
+      style="display:none;"
+    >
+      No attendees registered yet.
+    </div>
+
+    <div class="table-wrapper">
+
+      <table class="org-table">
+
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Registered At</th>
+            <th>Attendance</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="attendeesTableBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+const pageToken =
+localStorage.getItem(
+"token"
+);
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const eventId =
+params.get(
+"event"
+);
+
+async function loadAttendees(){
+
+if(!eventId){
+
+alert(
+"No event selected"
+);
+
+window.location.href =
+"officer.html";
+
+return;
+
+}
+
+try{
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/events/${eventId}/registrations`,
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const attendees =
+await response.json();
+
+if(attendees.error){
+
+alert(
+attendees.error
+);
+
+window.location.href =
+"officer.html";
+
+return;
+
+}
+
+renderAttendees(
+attendees
+);
+
+loadAttendanceSummary();
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(
+"Failed loading attendees"
+);
+
+}
+
+}
+
+async function loadAttendanceSummary(){
+
+try{
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/events/${eventId}/attendance-summary`,
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const summary =
+await response.json();
+
+if(summary.error){
+return;
+}
+
+document.getElementById(
+"attendanceSummary"
+).innerHTML =
+
+`
+<strong>Registered:</strong> ${summary.registered || 0}
+&nbsp;&nbsp;|&nbsp;&nbsp;
+
+<strong>Present:</strong> ${summary.present || 0}
+&nbsp;&nbsp;|&nbsp;&nbsp;
+
+<strong>Absent:</strong> ${summary.absent || 0}
+&nbsp;&nbsp;|&nbsp;&nbsp;
+
+<strong>Not Marked:</strong> ${summary.not_marked || 0}
+`;
+
+}
+catch(error){
+
+console.log(error);
+
+}
+
+}
+
+async function markAttendance(
+registrationId,
+status
+){
+
+try{
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/events/registrations/${registrationId}/attendance`,
+
+{
+method:"PUT",
+
+headers:{
+"Content-Type":"application/json",
+Authorization:`Bearer ${pageToken}`
+},
+
+body:JSON.stringify({
+attendance_status:status
+})
+
+}
+
+);
+
+const data =
+await response.json();
+
+if(data.error){
+
+alert(data.error);
+return;
+
+}
+
+await loadAttendees();
+
+}
+catch(error){
+
+console.log(error);
+
+alert(
+"Failed updating attendance"
+);
+
+}
+
+}
+
+function renderAttendees(attendees){
+
+const body =
+document.getElementById(
+"attendeesTableBody"
+);
+
+const empty =
+document.getElementById(
+"emptyAttendees"
+);
+
+body.innerHTML =
+"";
+
+if(!Array.isArray(attendees) || attendees.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+attendees.forEach(attendee=>{
+
+body.innerHTML +=
+
+`
+
+<tr>
+
+<td>
+${attendee.first_name} ${attendee.last_name}
+</td>
+
+<td>
+${attendee.email}
+</td>
+
+<td>
+${new Date(
+attendee.registered_at
+).toLocaleString()}
+</td>
+
+<td>
+${attendee.attendance_status}
+</td>
+
+<td>
+
+<button
+class="btn"
+onclick="markAttendance(
+${attendee.registration_id},
+'present'
+)"
+>
+Present
+</button>
+
+<button
+class="btn outline"
+onclick="markAttendance(
+${attendee.registration_id},
+'absent'
+)"
+>
+Absent
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+loadAttendees();
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

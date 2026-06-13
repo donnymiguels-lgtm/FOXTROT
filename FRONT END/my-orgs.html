@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Organizations - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<header class="navbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="index.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+    <a href="my-orgs.html" class="active">
+      <i class="fa-solid fa-user"></i>
+      <span>My Orgs</span>
+    </a>
+
+    <a href="my-events.html">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <span>My Events</span>
+    </a>
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge" id="roleBadge">
+      <i class="fa-solid fa-user"></i>
+      <span id="roleText">Student</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="section-header">
+    <div>
+      <h1>My Organizations</h1>
+      <p class="subtitle">
+        Organizations you're currently a member of.
+      </p>
+    </div>
+
+    <a
+      href="org-creation.html"
+      class="btn create-btn"
+      id="createOrganizationBtn"
+    >
+      <i class="fa-solid fa-plus"></i>
+      Create Organization
+    </a>
+  </div>
+
+  <section
+    class="org-grid"
+    id="myOrganizationsList"
+  ></section>
+
+  <template id="myOrganizationTemplate">
+
+    <div class="card myorg-card">
+
+      <div class="myorg-header">
+
+        <h3 class="org-name"></h3>
+
+        <span class="status active org-status">
+          Active
+        </span>
+
+      </div>
+
+      <p class="role org-role"></p>
+
+      <p class="muted small member-since"></p>
+
+      <div class="card-actions">
+
+        <button class="btn view-btn">
+          View Details
+        </button>
+
+        <button class="btn outline leave-btn">
+          Leave Organization
+        </button>
+
+      </div>
+
+    </div>
+
+  </template>
+
+</main>
+
+<script>
+
+const pageToken =
+localStorage.getItem("token");
+
+function formatRole(role){
+
+if(role === "president"){
+return "👑 President";
+}
+
+if(role === "vice_president"){
+return "⭐ Vice President";
+}
+
+if(role === "secretary"){
+return "📝 Secretary";
+}
+
+if(role === "treasurer"){
+return "💰 Treasurer";
+}
+
+if(role === "officer"){
+return "🛡 Officer";
+}
+
+return "👤 Member";
+
+}
+
+function canManage(role){
+
+return [
+"president",
+"vice_president",
+"secretary",
+"treasurer",
+"officer"
+].includes(role);
+
+}
+
+async function loadMyOrganizations(){
+
+try{
+
+const response =
+await fetch(
+"http://localhost:5000/api/organizations/my-organizations",
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+);
+
+const organizations =
+await response.json();
+
+const container =
+document.getElementById("myOrganizationsList");
+
+const template =
+document.getElementById("myOrganizationTemplate");
+
+container.innerHTML =
+"";
+
+if(
+!Array.isArray(organizations)
+||
+organizations.length===0
+){
+
+container.innerHTML =
+`
+<div class="empty-state">
+  You are not a member of any organizations yet.
+</div>
+`;
+
+return;
+
+}
+
+organizations.forEach(org=>{
+
+const clone =
+template.content.cloneNode(true);
+
+clone.querySelector(".org-name").textContent =
+org.name;
+
+clone.querySelector(".org-role").textContent =
+formatRole(org.organization_role);
+
+clone.querySelector(".org-status").textContent =
+formatRole(org.organization_role);
+
+clone.querySelector(".member-since").textContent =
+`Joined ${new Date(org.joined_at).toLocaleDateString()}`;
+
+const viewBtn =
+clone.querySelector(".view-btn");
+
+viewBtn.dataset.orgId =
+org.organization_id;
+
+viewBtn.addEventListener("click",()=>{
+
+window.location.href =
+`org-details.html?id=${org.organization_id}`;
+
+});
+
+const leaveBtn =
+clone.querySelector(".leave-btn");
+
+leaveBtn.dataset.orgId =
+org.organization_id;
+
+if(
+org.organization_role === "president"
+){
+
+leaveBtn.remove();
+
+}
+else{
+
+leaveBtn.addEventListener(
+"click",
+async()=>{
+
+const confirmLeave =
+confirm(
+`Leave ${org.name}?`
+);
+
+if(!confirmLeave){
+return;
+}
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/organizations/${org.organization_id}/leave`,
+{
+method:"DELETE",
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+if(data.message){
+
+loadMyOrganizations();
+
+}
+
+}
+catch(error){
+
+console.log(error);
+
+alert(
+"Failed leaving organization"
+);
+
+}
+
+}
+);
+
+}
+
+if(canManage(org.organization_role)){
+
+const manageButton =
+document.createElement("button");
+
+manageButton.className =
+"btn";
+
+manageButton.textContent =
+"Manage";
+
+manageButton.dataset.orgId =
+org.organization_id;
+
+manageButton.addEventListener("click",()=>{
+
+window.location.href =
+`officer.html?organization_id=${org.organization_id}`;
+
+});
+
+clone.querySelector(".card-actions").appendChild(
+manageButton
+);
+
+}
+
+container.appendChild(clone);
+
+});
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Failed loading my organizations");
+
+}
+
+}
+
+loadMyOrganizations();
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

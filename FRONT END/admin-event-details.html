@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Event Details - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+
+    <a href="admin.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="admin-organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="admin-events.html" class="active">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+
+    <div class="student-badge admin-badge" id="roleBadge">
+      <i class="fa-solid fa-user-shield"></i>
+      <span id="roleText">Admin</span>
+    </div>
+
+    <div class="profile" id="profileInitials">
+    </div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+
+  </div>
+
+</header>
+
+<main class="container">
+
+  <div class="back" id="backBtn">
+    ← Back to Admin Events
+  </div>
+
+  <section class="card org-details">
+
+    <div class="org-top">
+
+      <div>
+
+        <h2 id="eventTitle">
+          Loading...
+        </h2>
+
+        <div class="org-meta-row">
+
+          <span class="tag" id="eventCategory">
+            Event
+          </span>
+
+          <span class="status" id="eventStatus">
+            Loading...
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="event-buttons" id="adminActionButtons">
+
+        <button class="btn approve" id="approveEventBtn">
+          Approve
+        </button>
+
+        <button class="btn decline" id="rejectEventBtn">
+          Reject
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="org-stats">
+
+      <div class="stat-box">
+        <i class="fa-solid fa-building"></i>
+        <div>
+          <p>Organization</p>
+          <strong id="organizationName">
+            Loading...
+          </strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <i class="fa-solid fa-user"></i>
+        <div>
+          <p>Created By</p>
+          <strong id="createdBy">
+            Loading...
+          </strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <i class="fa-solid fa-location-dot"></i>
+        <div>
+          <p>Location</p>
+          <strong id="eventLocation">
+            Loading...
+          </strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <i class="fa-solid fa-users"></i>
+        <div>
+          <p>Registrations</p>
+          <strong id="registrationCount">
+            0
+          </strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="org-section">
+
+      <h3>Event Description</h3>
+
+      <p id="eventDescription">
+        Loading...
+      </p>
+
+    </div>
+
+    <div class="org-section">
+
+      <h3>Schedule</h3>
+
+      <p class="muted">
+        <strong>Start:</strong>
+        <span id="startDateTime"></span>
+      </p>
+
+      <p class="muted">
+        <strong>End:</strong>
+        <span id="endDateTime"></span>
+      </p>
+
+      <p class="muted">
+        <strong>Submitted:</strong>
+        <span id="submittedDate"></span>
+      </p>
+
+    </div>
+
+    <div class="org-section">
+
+      <h3>Organizer Information</h3>
+
+      <p class="muted">
+        <i class="fa-solid fa-building"></i>
+        <span id="organizerName"></span>
+      </p>
+
+      <p class="muted">
+        <i class="fa-solid fa-envelope"></i>
+        <span id="organizerEmail"></span>
+      </p>
+
+      <p class="muted">
+        <i class="fa-solid fa-location-dot"></i>
+        <span id="organizerLocation"></span>
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+const adminToken =
+localStorage.getItem("token");
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const eventId =
+params.get("id");
+
+document
+.getElementById("backBtn")
+.addEventListener("click",()=>{
+
+window.location.href =
+"admin-events.html";
+
+});
+
+async function loadEventDetails(){
+
+if(!eventId){
+
+alert("No event selected");
+
+window.location.href =
+"admin-events.html";
+
+return;
+
+}
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/events/${eventId}/details`
+);
+
+const event =
+await response.json();
+
+if(event.error){
+
+alert(event.error);
+
+window.location.href =
+"admin-events.html";
+
+return;
+
+}
+
+renderEvent(event);
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Failed loading event details");
+
+}
+
+}
+
+function renderEvent(event){
+
+document.title =
+`${event.title} - Admin Review`;
+
+const start =
+new Date(event.start_datetime);
+
+const end =
+new Date(event.end_datetime);
+
+document.getElementById("eventTitle").textContent =
+event.title;
+
+document.getElementById("eventCategory").textContent =
+event.category || "Event";
+
+document.getElementById("eventStatus").textContent =
+event.status || "Unknown";
+
+document.getElementById("organizationName").textContent =
+event.organization_name || "Unknown";
+
+document.getElementById("createdBy").textContent =
+`${event.first_name || ""} ${event.last_name || ""}`;
+
+document.getElementById("eventLocation").textContent =
+event.location || "No location";
+
+document.getElementById("registrationCount").textContent =
+event.registration_count || 0;
+
+document.getElementById("eventDescription").textContent =
+event.description || "No description provided.";
+
+document.getElementById("startDateTime").textContent =
+start.toLocaleString();
+
+document.getElementById("endDateTime").textContent =
+end.toLocaleString();
+
+document.getElementById("submittedDate").textContent =
+new Date(event.created_at).toLocaleString();
+
+document.getElementById("organizerName").textContent =
+event.organization_name || "Unknown Organization";
+
+document.getElementById("organizerEmail").textContent =
+event.contact_email || "No contact email";
+
+document.getElementById("organizerLocation").textContent =
+event.organization_location || "No organization location";
+
+const actionButtons =
+document.getElementById("adminActionButtons");
+
+if(event.status !== "pending"){
+
+actionButtons.style.display =
+"none";
+
+}
+else{
+
+actionButtons.style.display =
+"flex";
+
+}
+
+}
+
+document
+.getElementById("approveEventBtn")
+.addEventListener("click",async()=>{
+
+const confirmApprove =
+confirm("Approve this event?");
+
+if(!confirmApprove){
+return;
+}
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/events/${eventId}/approve`,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadEventDetails();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Approval failed");
+
+}
+
+});
+
+document
+.getElementById("rejectEventBtn")
+.addEventListener("click",async()=>{
+
+const confirmReject =
+confirm("Reject this event?");
+
+if(!confirmReject){
+return;
+}
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/events/${eventId}/reject`,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadEventDetails();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Rejection failed");
+
+}
+
+});
+
+loadEventDetails();
+
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

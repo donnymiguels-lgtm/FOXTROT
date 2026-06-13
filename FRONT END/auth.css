@@ -1,0 +1,300 @@
+* {
+  box-sizing: border-box;
+}
+
+/* =========================
+   PAGE LAYOUT
+========================= */
+.auth-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.auth-body {
+  background: #f5f7fb;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+  min-height: 100vh;
+}
+
+.auth-container {
+  text-align: center;
+}
+
+/* =========================
+   HEADER
+========================= */
+.auth-header h1 {
+  margin: 10px 0 5px;
+}
+
+.auth-header p {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.logo-icon {
+  background: #3b82f6;
+  color: white;
+  padding: 12px;
+  border-radius: 12px;
+  display: inline-block;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+/* =========================
+   CARD
+========================= */
+.auth-card {
+  background: white;
+  padding: 28px;
+  border-radius: 12px;
+  width: 400px;
+  margin-top: 20px;
+  text-align: left;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+
+
+/* =========================
+   LABELS
+========================= */
+.auth-card label {
+  font-size: 13px;
+  margin-top: 12px;
+  display: block;
+}
+
+/* =========================
+   ROW LAYOUT (REGISTER)
+========================= */
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.row .input-group {
+  flex: 1;
+}
+
+/* =========================
+   INPUT SYSTEM
+========================= */
+.input-group {
+  position: relative;
+  margin-top: 5px;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 10px 40px 10px 38px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+}
+
+/* Focus state */
+.input-group input:focus,
+.input-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+/* =========================
+   ICON SYSTEM
+========================= */
+.input-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #9ca3af;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+
+  pointer-events: none;
+}
+
+.input-icon:not(.right) {
+  left: 12px;
+}
+
+.input-icon.right {
+  right: 12px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.input-icon.right:hover {
+  color: #3b82f6;
+}
+
+/* =========================
+   PASSWORD ICON FIX
+========================= */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+input[type="password"] {
+  appearance: none;
+}
+
+/* =========================
+   ROLE BUTTONS (LOGIN)
+========================= */
+.role-select {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.role {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.role:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+}
+
+.role.active {
+  border: 2px solid #3b82f6;
+  color: #3b82f6;
+}
+
+/* =========================
+   CHECKBOX (REGISTER)
+========================= */
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.checkbox input {
+  width: 14px;
+  height: 14px;
+}
+
+/* =========================
+   OPTIONS (LOGIN)
+========================= */
+.auth-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+  font-size: 13px;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.remember input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.remember span {
+  line-height: 1;
+}
+
+/* =========================
+   LINKS
+========================= */
+.forgot {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.forgot:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+.btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn.full {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.btn:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+/* =========================
+   SWITCH TEXT
+========================= */
+.switch {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.switch a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+/* =========================
+   DEMO TEXT
+========================= */
+.demo {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+}

@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Officer Panel - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+
+    <a href="index.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+    <a href="my-orgs.html">
+      <i class="fa-solid fa-user"></i>
+      <span>My Orgs</span>
+    </a>
+
+    <a href="my-events.html">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <span>My Events</span>
+    </a>
+
+    <a href="officer.html" class="active" id="officerPanelLink">
+      <i class="fa-solid fa-user-tie"></i>
+      <span>Officer Panel</span>
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+
+  <div class="student-badge officer-badge" id="roleBadge">
+    <i class="fa-solid fa-user-tie"></i>
+    <span id="roleText">Student</span>
+  </div>
+
+  <div class="profile" id="profileInitials"></div>
+
+  <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+</div>
+
+</header>
+
+<main class="container" id="officerDashboard">
+
+  <div class="page-header">
+    <div>
+      <h1>
+        Officer Panel -
+        <span id="orgName">Loading...</span>
+      </h1>
+
+      <p class="subtitle">
+        Manage your organization and track member engagement.
+      </p>
+
+      <div class="form-group">
+        <label for="organizationSelect">
+          Select Organization
+        </label>
+
+        <select id="organizationSelect"></select>
+      </div>
+    </div>
+
+    <span class="tag role-badge" id="officerRole">
+      Loading...
+    </span>
+  </div>
+
+  <section class="card" id="overviewSection">
+
+    <h3>Overview</h3>
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <div>
+          <p>Total Members</p>
+          <h2 id="totalMembers">0</h2>
+          <span class="stat-sub">Current members</span>
+        </div>
+
+        <div class="stat-icon blue">
+          <i class="fa-solid fa-users"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div>
+          <p>Total Events</p>
+          <h2 id="activeEvents">0</h2>
+          <span class="stat-sub">All organization events</span>
+        </div>
+
+        <div class="stat-icon purple">
+          <i class="fa-solid fa-calendar"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div>
+          <p>Pending Requests</p>
+          <h2 id="pendingRequests">0</h2>
+          <span class="stat-sub danger">Requires action</span>
+        </div>
+
+        <div class="stat-icon orange">
+          <i class="fa-solid fa-envelope"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div>
+          <p>Attendance Analytics</p>
+<h2 id="attendanceRate">0%</h2>
+<span class="stat-sub" id="attendanceBreakdown">
+Present: 0 • Absent: 0
+</span>
+        </div>
+
+        <div class="stat-icon green">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="grid-2" id="chartsSection">
+
+    <div class="card">
+      <h3>Membership Distribution</h3>
+      <canvas id="membershipChart"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Event Attendance</h3>
+      <canvas id="attendanceChart"></canvas>
+    </div>
+
+
+    <section class="card">
+
+  <h3>Membership Analytics</h3>
+
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <p>President</p>
+      <h2 id="presidentCount">0</h2>
+    </div>
+
+    <div class="stat-card">
+      <p>Vice President</p>
+      <h2 id="vicePresidentCount">0</h2>
+    </div>
+
+    <div class="stat-card">
+      <p>Secretary</p>
+      <h2 id="secretaryCount">0</h2>
+    </div>
+
+    <div class="stat-card">
+      <p>Treasurer</p>
+      <h2 id="treasurerCount">0</h2>
+    </div>
+
+    <div class="stat-card">
+      <p>Officers</p>
+      <h2 id="officerCount">0</h2>
+    </div>
+
+    <div class="stat-card">
+      <p>Members</p>
+      <h2 id="memberCount">0</h2>
+    </div>
+
+  </div>
+
+</section>
+
+  </section>
+
+  <section class="card">
+
+  <h3>Latest Announcements</h3>
+
+  <div id="announcementsList"></div>
+
+  <div
+    class="empty-state"
+    id="emptyAnnouncements"
+    style="display:none;"
+  >
+    No announcements available.
+  </div>
+
+</section>
+
+  <section class="card" id="membershipRequestsSection">
+
+    <div class="requests-header">
+      <h3>Membership Requests</h3>
+      <span class="badge" id="pendingCount">0 Pending</span>
+    </div>
+
+    <div class="requests-list" id="membershipRequestsList"></div>
+
+    <div class="empty-state" id="emptyRequestsState" style="display:none;">
+      No pending membership requests.
+    </div>
+
+  </section>
+
+  <section class="card" id="organizationEventsSection">
+
+    <h3>Organization Events</h3>
+
+    <div id="organizationEventsList"></div>
+
+    <div class="empty-state" id="emptyOrganizationEvents" style="display:none;">
+      No organization events yet.
+    </div>
+
+  </section>
+
+  <section class="officer-actions">
+
+    <a href="#" class="btn primary" id="createEventBtn">
+      <i class="fa-solid fa-calendar-plus"></i>
+      Create New Event
+    </a>
+
+    <a href="#" class="btn outline" id="sendAnnouncementBtn">
+  <i class="fa-solid fa-bullhorn"></i>
+  Create Announcement
+</a>
+
+    <button class="btn outline" id="manageMembersBtn">
+      <i class="fa-solid fa-users"></i>
+      Review Membership
+    </button>
+
+  </section>
+
+  <template id="requestTemplate">
+
+    <div class="request-item">
+
+      <div>
+        <strong class="request-name"></strong>
+        <p class="muted request-email"></p>
+
+        <p class="muted small">
+          Applied on
+          <span class="request-date"></span>
+        </p>
+      </div>
+
+      <div class="actions">
+
+        <button class="btn approve request-approve-btn" data-request-id="">
+          Approve
+        </button>
+
+        <button class="btn decline request-decline-btn" data-request-id="">
+          Reject
+        </button>
+
+      </div>
+
+    </div>
+
+  </template>
+
+</main>
+
+<script>
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const organizationId =
+params.get("organization_id");
+
+const pageToken =
+localStorage.getItem(
+"token"
+);
+
+let currentOrganizationId =
+null;
+
+let officerOrganizationsList =
+[];
+
+let membershipChart =
+null;
+
+let attendanceChart =
+null;
+
+async function setupOfficerDashboard(){
+
+try{
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/organizations/my-organizations",
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const organizations =
+await response.json();
+
+const officerRoles =
+[
+"president",
+"vice_president",
+"secretary",
+"treasurer",
+"officer"
+];
+
+const officerOrganizations =
+organizations.filter(org=>
+officerRoles.includes(
+org.organization_role
+)
+);
+
+officerOrganizationsList =
+officerOrganizations;
+
+if(officerOrganizations.length===0){
+
+alert(
+"You do not manage any organization yet."
+);
+
+window.location.href =
+"my-orgs.html";
+
+return;
+
+}
+
+setupOrganizationSelector(
+officerOrganizations
+);
+
+let selectedOrganization =
+officerOrganizations[0];
+
+if(organizationId){
+
+const foundOrganization =
+officerOrganizations.find(org=>
+String(org.organization_id) === String(organizationId)
+);
+
+if(foundOrganization){
+
+selectedOrganization =
+foundOrganization;
+
+}
+
+}
+
+if(organizationId){
+
+document.querySelector(
+".form-group"
+).style.display =
+"none";
+
+}
+
+document.getElementById(
+"organizationSelect"
+).value =
+selectedOrganization.organization_id;
+
+await loadSelectedOrganization(
+selectedOrganization
+);
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(
+"Failed loading officer dashboard"
+);
+
+}
+
+}
+
+function setupOrganizationSelector(officerOrganizations){
+
+const select =
+document.getElementById(
+"organizationSelect"
+);
+
+select.innerHTML =
+"";
+
+officerOrganizations.forEach(org=>{
+
+select.innerHTML += `
+
+<option value="${org.organization_id}">
+${org.name}
+</option>
+
+`;
+
+});
+
+select.value =
+officerOrganizations[0].organization_id;
+
+select.addEventListener(
+
+"change",
+
+async()=>{
+
+const selectedOrganization =
+officerOrganizationsList.find(org=>
+String(org.organization_id) === String(select.value)
+);
+
+if(selectedOrganization){
+
+await loadSelectedOrganization(
+selectedOrganization
+);
+
+}
+
+}
+
+);
+
+}
+
+async function loadSelectedOrganization(organization){
+
+currentOrganizationId =
+organization.organization_id;
+
+document.getElementById(
+"orgName"
+).textContent =
+organization.name;
+
+document.getElementById(
+"officerRole"
+).textContent =
+organization.organization_role;
+
+const role =
+organization.organization_role;
+
+const createEventBtn =
+document.getElementById(
+"createEventBtn"
+);
+
+if(
+role === "president" ||
+role === "vice_president"
+){
+
+createEventBtn.style.display =
+"inline-flex";
+
+createEventBtn.href =
+`event-creation.html?org=${organization.organization_id}`;
+
+}
+else{
+
+createEventBtn.style.display =
+"none";
+
+createEventBtn.href =
+"#";
+
+}
+
+document.getElementById(
+"manageMembersBtn"
+).dataset.orgId =
+organization.organization_id;
+
+document
+.getElementById(
+"manageMembersBtn"
+)
+.onclick =
+()=>{
+
+window.location.href =
+`manage-members.html?org=${organization.organization_id}`;
+
+};
+
+const announcementBtn =
+document.getElementById(
+"sendAnnouncementBtn"
+);
+
+if(
+role === "president" ||
+role === "vice_president"
+){
+
+announcementBtn.style.display =
+"inline-flex";
+
+announcementBtn.href =
+`create-announcement.html?org=${organization.organization_id}`;
+
+}
+else{
+
+announcementBtn.style.display =
+"none";
+
+announcementBtn.href =
+"#";
+
+}
+
+await loadOfficerStats(
+organization.organization_id
+);
+
+await loadMembershipRequests(
+organization.organization_id
+);
+
+await loadOrganizationEvents();
+
+await loadAnnouncements();
+
+}
+
+async function loadOfficerStats(organizationId){
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/organizations/${organizationId}/dashboard`,
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const data =
+await response.json();
+
+if(data.error){
+
+alert(data.error);
+return;
+
+}
+
+document.getElementById(
+"totalMembers"
+).textContent =
+data.total_members || 0;
+
+document.getElementById(
+"activeEvents"
+).textContent =
+data.total_events || 0;
+
+document.getElementById(
+"pendingRequests"
+).textContent =
+data.pending_requests || 0;
+
+document.getElementById(
+"pendingCount"
+).textContent =
+`${data.pending_requests || 0} Pending`;
+
+document.getElementById(
+"attendanceRate"
+).textContent =
+`${data.attendance_rate || 0}%`;
+
+document.getElementById(
+"attendanceBreakdown"
+).textContent =
+`Present: ${data.present_count || 0} • Absent: ${data.absent_count || 0}`;
+
+const roleStats =
+data.role_stats || {};
+
+document.getElementById(
+"presidentCount"
+).textContent =
+roleStats.president || 0;
+
+document.getElementById(
+"vicePresidentCount"
+).textContent =
+roleStats.vice_president || 0;
+
+document.getElementById(
+"secretaryCount"
+).textContent =
+roleStats.secretary || 0;
+
+document.getElementById(
+"treasurerCount"
+).textContent =
+roleStats.treasurer || 0;
+
+document.getElementById(
+"officerCount"
+).textContent =
+roleStats.officer || 0;
+
+document.getElementById(
+"memberCount"
+).textContent =
+roleStats.member || 0;
+
+renderOfficerCharts(data);
+
+}
+
+function renderOfficerCharts(data){
+
+const membershipCtx =
+document
+.getElementById("membershipChart")
+.getContext("2d");
+
+const attendanceCtx =
+document
+.getElementById("attendanceChart")
+.getContext("2d");
+
+if(membershipChart){
+
+membershipChart.destroy();
+
+}
+
+if(attendanceChart){
+
+attendanceChart.destroy();
+
+}
+
+membershipChart =
+new Chart(membershipCtx,{
+type:"bar",
+data:{
+labels:[
+"President",
+"Vice President",
+"Secretary",
+"Treasurer",
+"Officers",
+"Members"
+],
+datasets:[
+{
+label:"Members",
+data:[
+data.role_stats?.president || 0,
+data.role_stats?.vice_president || 0,
+data.role_stats?.secretary || 0,
+data.role_stats?.treasurer || 0,
+data.role_stats?.officer || 0,
+data.role_stats?.member || 0
+]
+}
+]
+},
+options:{
+responsive:true,
+plugins:{
+legend:{
+display:false
+}
+},
+scales:{
+y:{
+beginAtZero:true,
+ticks:{
+precision:0
+}
+}
+}
+}
+});
+
+attendanceChart =
+new Chart(attendanceCtx,{
+type:"pie",
+data:{
+labels:[
+"Present",
+"Absent"
+],
+datasets:[
+{
+data:[
+data.present_count || 0,
+data.absent_count || 0
+]
+}
+]
+},
+options:{
+responsive:true,
+plugins:{
+legend:{
+position:"bottom"
+}
+}
+}
+});
+
+}
+
+async function loadMembershipRequests(organizationId){
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/organizations/${organizationId}/membership-requests`,
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const requests =
+await response.json();
+
+const list =
+document.getElementById(
+"membershipRequestsList"
+);
+
+const empty =
+document.getElementById(
+"emptyRequestsState"
+);
+
+const template =
+document.getElementById(
+"requestTemplate"
+);
+
+list.innerHTML =
+"";
+
+if(!Array.isArray(requests) || requests.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+requests.forEach(request=>{
+
+const clone =
+template.content.cloneNode(
+true
+);
+
+clone.querySelector(
+".request-name"
+).textContent =
+`${request.first_name} ${request.last_name}`;
+
+clone.querySelector(
+".request-email"
+).textContent =
+request.email;
+
+clone.querySelector(
+".request-date"
+).textContent =
+new Date(
+request.created_at
+).toLocaleDateString();
+
+const approveBtn =
+clone.querySelector(
+".request-approve-btn"
+);
+
+approveBtn.dataset.requestId =
+request.request_id;
+
+approveBtn.addEventListener(
+
+"click",
+
+async()=>{
+
+await approveMembership(
+request.request_id
+);
+
+}
+
+);
+
+const rejectBtn =
+clone.querySelector(
+".request-decline-btn"
+);
+
+rejectBtn.dataset.requestId =
+request.request_id;
+
+rejectBtn.addEventListener(
+
+"click",
+
+async()=>{
+
+await rejectMembership(
+request.request_id
+);
+
+}
+
+);
+
+list.appendChild(
+clone
+);
+
+});
+
+}
+
+async function loadOrganizationEvents(){
+
+try{
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/events/my-organization-events",
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const events =
+await response.json();
+
+console.log("CURRENT ORG:", currentOrganizationId);
+console.log("ORG EVENTS:", events);
+
+const list =
+document.getElementById(
+"organizationEventsList"
+);
+
+const empty =
+document.getElementById(
+"emptyOrganizationEvents"
+);
+
+list.innerHTML =
+"";
+
+if(!Array.isArray(events) || events.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+const filteredEvents =
+events.filter(event=>
+String(event.organization_id) === String(currentOrganizationId)
+);
+
+
+filteredEvents.forEach(event=>{
+
+const card =
+document.createElement(
+"div"
+);
+
+card.className =
+"mini-card";
+
+card.innerHTML = `
+
+<div>
+
+<strong>${event.title}</strong>
+
+<p>
+${event.organization_name}
+•
+${event.status}
+•
+${new Date(event.start_datetime).toLocaleDateString()}
+</p>
+
+<p class="muted small">
+${event.registration_count} registered
+</p>
+
+</div>
+
+<button
+class="btn outline attendees-btn"
+data-event-id="${event.event_id}"
+>
+Manage Attendance
+</button>
+
+`;
+
+const attendeesBtn =
+card.querySelector(
+".attendees-btn"
+);
+
+attendeesBtn.addEventListener(
+
+"click",
+
+()=>{
+
+window.location.href =
+`event-attendees.html?event=${event.event_id}`;
+
+}
+
+);
+
+list.appendChild(
+card
+);
+
+});
+
+if(filteredEvents.length===0){
+
+empty.style.display =
+"block";
+
+}
+
+}
+
+catch(error){
+
+console.log(error);
+
+}
+
+}
+
+async function approveMembership(requestId){
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/organizations/membership/${requestId}/approve`,
+
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+await refreshOfficerData();
+
+}
+
+async function rejectMembership(requestId){
+
+const confirmReject =
+confirm(
+"Reject this membership request?"
+);
+
+if(!confirmReject){
+
+return;
+
+}
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/organizations/membership/${requestId}/reject`,
+
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+await refreshOfficerData();
+
+}
+
+async function loadAnnouncements(){
+
+try{
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/announcements/organization/${currentOrganizationId}`,
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const announcements =
+await response.json();
+
+const list =
+document.getElementById(
+"announcementsList"
+);
+
+const empty =
+document.getElementById(
+"emptyAnnouncements"
+);
+
+list.innerHTML =
+"";
+
+if(
+!Array.isArray(announcements)
+||
+announcements.length===0
+){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+announcements.forEach(announcement=>{
+
+list.innerHTML += `
+
+<div class="mini-card">
+
+<div>
+
+<strong>
+${announcement.title}
+</strong>
+
+<p class="muted">
+${announcement.content}
+</p>
+
+<p class="muted small">
+
+${announcement.first_name}
+${announcement.last_name}
+
+•
+
+${new Date(
+announcement.created_at
+).toLocaleString()}
+
+</p>
+
+</div>
+
+<button
+class="btn outline delete-announcement-btn"
+data-announcement-id="${announcement.announcement_id}"
+>
+Delete
+</button>
+
+</div>
+
+`;
+
+});
+
+document
+.querySelectorAll(
+".delete-announcement-btn"
+)
+.forEach(button=>{
+
+button.addEventListener(
+
+"click",
+
+async()=>{
+
+const announcementId =
+button.dataset.announcementId;
+
+const confirmDelete =
+confirm(
+"Delete this announcement?"
+);
+
+if(!confirmDelete){
+return;
+}
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/announcements/${announcementId}`,
+
+{
+method:"DELETE",
+
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+await loadAnnouncements();
+
+}
+
+);
+
+});
+
+}
+catch(error){
+
+console.log(error);
+
+}
+
+}
+
+async function refreshOfficerData(){
+
+if(currentOrganizationId){
+
+const selectedOrganization =
+officerOrganizationsList.find(org=>
+String(org.organization_id) === String(currentOrganizationId)
+);
+
+if(selectedOrganization){
+
+await loadSelectedOrganization(
+selectedOrganization
+);
+
+}
+
+}
+
+}
+
+setupOfficerDashboard();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

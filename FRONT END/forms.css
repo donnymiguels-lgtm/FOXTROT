@@ -1,0 +1,234 @@
+/* FORM CONTAINER */
+
+#createOrganizationPage .card{
+
+padding:40px;
+
+max-width:1100px;
+
+margin:auto;
+
+}
+
+
+/* FORM GROUP */
+
+.form-group{
+
+display:flex;
+
+flex-direction:column;
+
+gap:10px;
+
+margin-bottom:24px;
+
+}
+
+
+/* TWO COLUMN GRID */
+
+.grid-2{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:20px;
+
+}
+
+
+/* INPUTS */
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+
+width:100%;
+
+padding:14px;
+
+border:1px solid #dcdcdc;
+
+border-radius:10px;
+
+font-size:14px;
+
+}
+
+
+/* ICON INPUT */
+
+.input-icon{
+
+position:relative;
+
+display:flex;
+
+align-items:center;
+
+}
+
+
+.input-icon i{
+
+position:absolute;
+
+left:14px;
+
+color:gray;
+
+}
+
+
+.input-icon input{
+
+padding-left:42px;
+
+}
+
+
+/* TEXTAREA */
+
+textarea{
+
+resize:vertical;
+
+min-height:120px;
+
+}
+
+
+/* NOTICE */
+
+.notice-box{
+
+background:#eef4ff;
+
+padding:16px;
+
+border-radius:10px;
+
+margin-top:20px;
+
+margin-bottom:20px;
+
+font-size:14px;
+
+}
+
+
+/* BUTTONS */
+
+.form-actions{
+
+display:flex;
+
+gap:15px;
+
+margin-top:30px;
+
+}
+
+
+.form-actions .primary{
+
+flex:1;
+
+}
+
+
+/* MOBILE */
+
+@media (max-width:768px){
+
+.grid-2{
+
+grid-template-columns:1fr;
+
+}
+
+.form-actions{
+
+flex-direction:column;
+
+}
+
+}
+
+/* THREE COLUMN GRID */
+
+.grid-3{
+
+display:grid;
+
+grid-template-columns:
+1fr 1fr 1fr;
+
+gap:20px;
+
+}
+
+
+/* CHECKBOX */
+
+.checkbox-group{
+
+display:flex;
+
+align-items:center;
+
+gap:10px;
+
+margin-top:10px;
+
+margin-bottom:25px;
+
+}
+
+
+/* FORM SECTION HEADINGS */
+
+form h3{
+
+margin-top:30px;
+
+margin-bottom:20px;
+
+}
+
+
+/* DIVIDERS */
+
+form hr{
+
+margin:30px 0;
+
+border:none;
+
+border-top:1px solid #e5e7eb;
+
+}
+
+
+/* FILE INPUT */
+
+input[type="file"]{
+
+padding:10px 0;
+
+}
+
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+.grid-3{
+
+grid-template-columns:1fr;
+
+}
+
+}

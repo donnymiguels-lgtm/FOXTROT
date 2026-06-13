@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Announcement - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="forms.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+
+    <a href="index.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+    <a href="my-orgs.html">
+      <i class="fa-solid fa-user"></i>
+      <span>My Orgs</span>
+    </a>
+
+    <a href="my-events.html">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <span>My Events</span>
+    </a>
+
+    <a href="officer.html" id="officerPanelLink">
+      <i class="fa-solid fa-user-tie"></i>
+      <span>Officer Panel</span>
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge" id="roleBadge">
+      <i class="fa-solid fa-user"></i>
+      <span id="roleText">Student</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+  </div>
+
+</header>
+
+<main class="container">
+
+  <div class="page-header">
+    <div>
+      <h1>Create Announcement</h1>
+      <p class="subtitle">
+        Post an official announcement for your organization members.
+      </p>
+    </div>
+
+    <a href="officer.html" class="btn outline">
+      Back to Officer Panel
+    </a>
+  </div>
+
+  <section class="card">
+
+    <form id="announcementForm">
+
+      <div class="form-group">
+
+        <label for="announcementOrganization">
+          Organization *
+        </label>
+
+        <select
+          id="announcementOrganization"
+          name="organizationId"
+          required
+        >
+          <option value="">
+            Select Organization
+          </option>
+        </select>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="announcementTitle">
+          Title *
+        </label>
+
+        <input
+          type="text"
+          id="announcementTitle"
+          name="title"
+          placeholder="e.g. General Assembly Reminder"
+          required
+          maxlength="255"
+        />
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="announcementContent">
+          Announcement *
+        </label>
+
+        <textarea
+          id="announcementContent"
+          name="content"
+          rows="8"
+          placeholder="Write your announcement here..."
+          required
+        ></textarea>
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="submit"
+          class="btn primary"
+        >
+          Post Announcement
+        </button>
+
+        <a
+          href="officer.html"
+          class="btn outline"
+        >
+          Cancel
+        </a>
+
+      </div>
+
+    </form>
+
+  </section>
+
+</main>
+
+<script>
+
+const pageToken =
+localStorage.getItem(
+"token"
+);
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const selectedOrgId =
+params.get(
+"org"
+);
+
+async function loadOrganizations(){
+
+try{
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/organizations/my-organizations",
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const organizations =
+await response.json();
+
+const select =
+document.getElementById(
+"announcementOrganization"
+);
+
+const allowedOrganizations =
+organizations.filter(org=>
+org.organization_role === "president" ||
+org.organization_role === "vice_president"
+);
+
+if(allowedOrganizations.length===0){
+
+alert(
+"Only presidents and vice presidents can create announcements."
+);
+
+window.location.href =
+"officer.html";
+
+return;
+
+}
+
+allowedOrganizations.forEach(org=>{
+
+const selected =
+String(org.organization_id) === String(selectedOrgId)
+?
+"selected"
+:
+"";
+
+select.innerHTML += `
+
+<option
+value="${org.organization_id}"
+${selected}
+>
+${org.name}
+</option>
+
+`;
+
+});
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(
+"Failed loading organizations"
+);
+
+}
+
+}
+
+document
+.getElementById(
+"announcementForm"
+)
+.addEventListener(
+
+"submit",
+
+async(e)=>{
+
+e.preventDefault();
+
+const form =
+new FormData(e.target);
+
+const payload =
+{
+organization_id:
+Number(
+form.get("organizationId")
+),
+
+title:
+form.get("title"),
+
+content:
+form.get("content")
+};
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/announcements",
+
+{
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+Authorization:
+`Bearer ${pageToken}`
+},
+
+body:
+JSON.stringify(
+payload
+)
+}
+
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+if(data.message){
+
+window.location.href =
+"officer.html";
+
+}
+
+}
+
+);
+
+loadOrganizations();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

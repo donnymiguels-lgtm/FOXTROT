@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Organization Details - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<header class="navbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="index.html">
+      <i class="fa-solid fa-chart-line"></i><span>Dashboard</span>
+    </a>
+
+    <a href="organizations.html" class="active">
+      <i class="fa-solid fa-building"></i><span>Organizations</span>
+    </a>
+
+    <a href="events.html">
+      <i class="fa-solid fa-calendar"></i><span>Events</span>
+    </a>
+
+    <a href="my-orgs.html">
+      <i class="fa-solid fa-user"></i><span>My Orgs</span>
+    </a>
+
+    <a href="my-events.html">
+      <i class="fa-solid fa-clipboard-list"></i><span>My Events</span>
+    </a>
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge" id="roleBadge">
+      <i class="fa-solid fa-user"></i>
+      <span id="roleText">Student</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="back" id="backBtn">
+    ← Back to Organizations
+  </div>
+
+  <section class="card org-details">
+
+    <div class="org-top">
+      <div>
+        <h2 id="orgName">Loading...</h2>
+
+        <div class="org-meta-row">
+          <span class="tag" id="orgCategory">Category</span>
+        </div>
+      </div>
+
+      <button
+        class="btn join-btn"
+        id="joinOrganizationBtn"
+        data-org-id=""
+      >
+        Join Organization
+      </button>
+    </div>
+
+    <div class="org-stats">
+
+      <div class="stat-box">
+        <i class="fa-solid fa-users"></i>
+        <div>
+          <p>Members</p>
+          <strong id="memberCount">0</strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <i class="fa-solid fa-calendar"></i>
+        <div>
+          <p>Events</p>
+          <strong id="eventCount">0</strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <i class="fa-solid fa-bullhorn"></i>
+        <div>
+          <p>Announcements</p>
+          <strong id="announcementCount">0</strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <i class="fa-solid fa-location-dot"></i>
+        <div>
+          <p>Location</p>
+          <strong id="orgLocation">No location</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="org-section">
+      <h3>About</h3>
+
+      <p id="orgDescription">
+        Loading organization description...
+      </p>
+
+      <p class="muted small">
+        Created on
+        <span id="orgCreatedAt">Loading...</span>
+      </p>
+    </div>
+
+    <div class="org-section">
+      <h3>Contact Information</h3>
+
+      <p class="muted">
+        <i class="fa-solid fa-envelope"></i>
+        <span id="orgContact">No contact email</span>
+      </p>
+    </div>
+
+    <div class="org-section">
+      <h3>Officers</h3>
+
+      <div class="officer-grid" id="officersList"></div>
+
+      <div
+        class="empty-state"
+        id="emptyOfficers"
+        style="display:none;"
+      >
+        No officers listed.
+      </div>
+    </div>
+
+    <div class="org-section">
+      <h3>Upcoming Events</h3>
+
+      <div class="event-list" id="organizationEventsList"></div>
+
+      <div
+        class="empty-state"
+        id="emptyEvents"
+        style="display:none;"
+      >
+        No upcoming events.
+      </div>
+    </div>
+
+    <div class="org-section">
+      <h3>Recent Announcements</h3>
+
+      <div class="event-list" id="organizationAnnouncementsList"></div>
+
+      <div
+        class="empty-state"
+        id="emptyAnnouncements"
+        style="display:none;"
+      >
+        No announcements yet.
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+const pageToken =
+localStorage.getItem("token");
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const organizationId =
+params.get("id");
+
+document
+.getElementById("backBtn")
+.addEventListener("click", ()=>{
+
+window.location.href =
+"organizations.html";
+
+});
+
+async function loadOrganizationDetails(){
+
+if(!organizationId){
+
+alert("No organization selected");
+
+window.location.href =
+"organizations.html";
+
+return;
+
+}
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/organizations/${organizationId}/details`
+);
+
+const data =
+await response.json();
+
+if(data.error){
+
+alert(data.error);
+
+window.location.href =
+"organizations.html";
+
+return;
+
+}
+
+renderOrganization(
+data
+);
+
+await checkMembershipStatus();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Failed loading organization details");
+
+}
+
+}
+
+function renderOrganization(data){
+
+const organization =
+data.organization;
+
+document.title =
+`${organization.name} - OrgHub`;
+
+document.getElementById("orgName").textContent =
+organization.name;
+
+document.getElementById("orgCategory").textContent =
+organization.category || "General";
+
+document.getElementById("memberCount").textContent =
+organization.member_count || 0;
+
+document.getElementById("eventCount").textContent =
+organization.event_count || 0;
+
+document.getElementById("announcementCount").textContent =
+organization.announcement_count || 0;
+
+document.getElementById("orgLocation").textContent =
+organization.location || "No location";
+
+document.getElementById("orgDescription").textContent =
+organization.description || "No description provided.";
+
+document.getElementById("orgContact").textContent =
+organization.contact_email || "No contact email";
+
+document.getElementById("orgCreatedAt").textContent =
+organization.created_at
+?
+new Date(organization.created_at).toLocaleDateString()
+:
+"Unknown date";
+
+const joinBtn =
+document.getElementById("joinOrganizationBtn");
+
+joinBtn.dataset.orgId =
+organization.organization_id;
+
+renderOfficers(
+data.officers || []
+);
+
+renderEvents(
+data.events || []
+);
+
+renderAnnouncements(
+data.announcements || []
+);
+
+}
+
+function formatRole(role){
+
+const roleMap =
+{
+president:"President",
+vice_president:"Vice President",
+secretary:"Secretary",
+treasurer:"Treasurer",
+officer:"Officer",
+member:"Member"
+};
+
+return roleMap[role] || role;
+
+}
+
+function getRoleIcon(role){
+
+if(role === "president"){
+return "👑";
+}
+
+if(role === "vice_president"){
+return "⭐";
+}
+
+if(role === "secretary"){
+return "📝";
+}
+
+if(role === "treasurer"){
+return "💰";
+}
+
+return "🎓";
+
+}
+
+function renderOfficers(officers){
+
+const list =
+document.getElementById("officersList");
+
+const empty =
+document.getElementById("emptyOfficers");
+
+list.innerHTML =
+"";
+
+if(!Array.isArray(officers) || officers.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+officers.forEach(officer=>{
+
+list.innerHTML += `
+
+<div class="officer-card">
+
+<p class="role">
+${getRoleIcon(officer.organization_role)}
+${formatRole(officer.organization_role)}
+</p>
+
+<strong>
+${officer.first_name}
+${officer.last_name}
+</strong>
+
+<p class="muted">
+${officer.email}
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+function renderEvents(events){
+
+const list =
+document.getElementById("organizationEventsList");
+
+const empty =
+document.getElementById("emptyEvents");
+
+list.innerHTML =
+"";
+
+if(!Array.isArray(events) || events.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+events.forEach(event=>{
+
+list.innerHTML += `
+
+<div class="event-row">
+
+<div>
+
+<strong>
+${event.title}
+</strong>
+
+<p class="muted small">
+${event.location || "No location"}
+•
+${new Date(event.start_datetime).toLocaleString()}
+</p>
+
+</div>
+
+<span class="muted">
+${event.category || "Event"}
+</span>
+
+</div>
+
+`;
+
+});
+
+}
+
+function renderAnnouncements(announcements){
+
+const list =
+document.getElementById("organizationAnnouncementsList");
+
+const empty =
+document.getElementById("emptyAnnouncements");
+
+list.innerHTML =
+"";
+
+if(!Array.isArray(announcements) || announcements.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+announcements.forEach(announcement=>{
+
+list.innerHTML += `
+
+<div class="event-row">
+
+<div>
+
+<strong>
+${announcement.title}
+</strong>
+
+<p class="muted">
+${announcement.content}
+</p>
+
+<p class="muted small">
+Posted by
+${announcement.first_name}
+${announcement.last_name}
+•
+${new Date(announcement.created_at).toLocaleString()}
+</p>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+async function checkMembershipStatus(){
+
+if(!pageToken){
+
+return;
+
+}
+
+try{
+
+const response =
+await fetch(
+"http://localhost:5000/api/organizations/my-organizations",
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+);
+
+const myOrganizations =
+await response.json();
+
+const isMember =
+Array.isArray(myOrganizations)
+&&
+myOrganizations.some(org=>
+String(org.organization_id) === String(organizationId)
+);
+
+const joinBtn =
+document.getElementById("joinOrganizationBtn");
+
+if(isMember){
+
+joinBtn.textContent =
+"Already Joined";
+
+joinBtn.disabled =
+true;
+
+joinBtn.classList.add("disabled");
+
+}
+
+}
+catch(error){
+
+console.log(error);
+
+}
+
+}
+
+document
+.getElementById("joinOrganizationBtn")
+.addEventListener("click", async()=>{
+
+if(!pageToken){
+
+alert("Please login first");
+
+return;
+
+}
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/organizations/${organizationId}/join`,
+{
+method:"POST",
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+if(data.message){
+
+const joinBtn =
+document.getElementById("joinOrganizationBtn");
+
+joinBtn.textContent =
+"Request Sent";
+
+joinBtn.disabled =
+true;
+
+joinBtn.classList.add("disabled");
+
+}
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Join request failed");
+
+}
+
+});
+
+loadOrganizationDetails();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>
