@@ -1,7 +1,7 @@
 const db =
 require("../db");
 
-// CREATE ANNOUNCEMENT
+// ANNOUNCEMENT CONTROLLER REVIEWED
 
 exports.createAnnouncement =
 async(req,res)=>{
