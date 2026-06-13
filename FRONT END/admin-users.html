@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Users - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+
+    <a href="admin.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="admin-organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="admin-events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+    <a href="admin-users.html" class="active">
+      <i class="fa-solid fa-users"></i>
+      <span>Users</span>
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge admin-badge" id="roleBadge">
+      <i class="fa-solid fa-user-shield"></i>
+      <span id="roleText">Admin</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+  </div>
+
+</header>
+
+<main class="container">
+
+  <h1>User Management</h1>
+
+  <p class="subtitle">
+    View and manage registered OrgHub users.
+  </p>
+
+  <section class="card">
+
+    <div class="org-controls">
+
+      <div class="tabs">
+
+        <button class="tab active" data-role="all">
+          All (<span id="allCount">0</span>)
+        </button>
+
+        <button class="tab" data-role="student">
+          Students (<span id="studentCount">0</span>)
+        </button>
+
+        <button class="tab" data-role="admin">
+          Admins (<span id="adminCount">0</span>)
+        </button>
+
+      </div>
+
+      <div class="search-box">
+        <i class="fa-solid fa-search"></i>
+
+        <input
+          type="text"
+          id="userSearch"
+          placeholder="Search users..."
+        >
+      </div>
+
+    </div>
+
+    <div class="table-wrapper">
+
+      <table class="org-table">
+
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="usersTableBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+const adminToken =
+localStorage.getItem("token");
+
+let allUsers =
+[];
+
+let currentRole =
+"all";
+
+document
+.querySelectorAll(".tab")
+.forEach(tab=>{
+
+tab.addEventListener("click",()=>{
+
+document
+.querySelectorAll(".tab")
+.forEach(item=>
+item.classList.remove("active")
+);
+
+tab.classList.add("active");
+
+currentRole =
+tab.dataset.role;
+
+renderUsers();
+
+});
+
+});
+
+document
+.getElementById("userSearch")
+.addEventListener("input",()=>{
+
+renderUsers();
+
+});
+
+async function loadUsers(){
+
+try{
+
+const response =
+await fetch(
+"http://localhost:5000/api/users",
+{
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+);
+
+allUsers =
+await response.json();
+
+updateCounts();
+
+renderUsers();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Failed loading users");
+
+}
+
+}
+
+function updateCounts(){
+
+document.getElementById("allCount").textContent =
+Array.isArray(allUsers)
+?
+allUsers.length
+:
+0;
+
+document.getElementById("studentCount").textContent =
+allUsers.filter(user=>
+user.system_role === "student"
+).length;
+
+document.getElementById("adminCount").textContent =
+allUsers.filter(user=>
+user.system_role === "admin"
+).length;
+
+}
+
+function renderUsers(){
+
+const searchValue =
+document
+.getElementById("userSearch")
+.value
+.toLowerCase();
+
+const body =
+document.getElementById("usersTableBody");
+
+body.innerHTML =
+"";
+
+const filteredUsers =
+allUsers.filter(user=>{
+
+const fullName =
+`${user.first_name || ""} ${user.last_name || ""}`
+.toLowerCase();
+
+const email =
+String(user.email || "")
+.toLowerCase();
+
+const role =
+String(user.system_role || "")
+.toLowerCase();
+
+const matchesSearch =
+fullName.includes(searchValue)
+||
+email.includes(searchValue)
+||
+role.includes(searchValue);
+
+const matchesRole =
+currentRole === "all"
+||
+role === currentRole;
+
+return matchesSearch && matchesRole;
+
+});
+
+if(filteredUsers.length===0){
+
+body.innerHTML =
+`
+<tr>
+  <td colspan="5">
+    No users found.
+  </td>
+</tr>
+`;
+
+return;
+
+}
+
+filteredUsers.forEach(user=>{
+
+const fullName =
+`${user.first_name || ""} ${user.last_name || ""}`.trim()
+||
+"Unnamed User";
+
+body.innerHTML +=
+`
+<tr>
+
+  <td>
+    <i class="fa-solid fa-user"></i>
+    ${fullName}
+  </td>
+
+  <td>
+    ${user.email || "No email"}
+  </td>
+
+  <td>
+    <span class="status ${user.system_role}">
+      ${user.system_role || "student"}
+    </span>
+  </td>
+
+  <td>
+    ${user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
+  </td>
+
+  <td>
+    <button
+      class="link-btn"
+      onclick="viewUser(${user.user_id})"
+    >
+      <i class="fa-solid fa-eye"></i>
+      View
+    </button>
+  </td>
+
+</tr>
+`;
+
+});
+
+}
+
+function viewUser(userId){
+
+window.location.href =
+`admin-user-details.html?id=${userId}`;
+
+}
+
+loadUsers();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

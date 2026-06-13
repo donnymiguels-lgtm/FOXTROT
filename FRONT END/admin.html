@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <title>Admin Dashboard - OrgHub</title>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">
+
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+
+  </div>
+
+  <nav class="nav-links">
+
+    <a href="admin.html" class="active">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="admin-organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="admin-events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+
+    <div class="student-badge admin-badge" id="roleBadge">
+      <i class="fa-solid fa-user-shield"></i>
+      <span id="roleText">Admin</span>
+    </div>
+
+    <div class="profile" id="profileInitials">
+      
+    </div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+
+
+  </div>
+
+</header>
+
+<main class="container" id="adminDashboard">
+
+  <h1>Admin Dashboard</h1>
+
+  <p class="subtitle">
+    System overview and management console.
+  </p>
+
+  <section class="card">
+
+    <h3>Overview</h3>
+
+    <div class="stats-grid">
+
+      <div class="card stat-card">
+
+        <div>
+          <p>Total Organizations</p>
+          <h2 id="totalOrgs">0</h2>
+        </div>
+
+        <div class="stat-icon blue">
+          <i class="fa-solid fa-building"></i>
+        </div>
+
+      </div>
+
+      <div class="card stat-card">
+
+        <div>
+          <p>Total Students</p>
+          <h2 id="totalStudents">0</h2>
+        </div>
+
+        <div class="stat-icon green">
+          <i class="fa-solid fa-users"></i>
+        </div>
+
+      </div>
+
+      <div class="card stat-card">
+
+        <div>
+          <p>Active Events</p>
+          <h2 id="activeEvents">0</h2>
+        </div>
+
+        <div class="stat-icon purple">
+          <i class="fa-solid fa-calendar"></i>
+        </div>
+
+      </div>
+
+      <div class="card stat-card">
+
+        <div>
+          <p>Pending Approvals</p>
+          <h2 id="pendingApprovals">0</h2>
+        </div>
+
+        <div class="stat-icon orange">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="grid-2">
+
+    <div class="card">
+      <h3>System Totals</h3>
+
+      <canvas
+        id="platformGrowthChart"
+        data-chart="platform-growth"
+      ></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Organization Categories</h3>
+
+      <canvas
+        id="orgCategoryChart"
+        data-chart="organization-categories"
+      ></canvas>
+    </div>
+
+  </section>
+
+  <section class="grid-2">
+
+    <div class="card" id="pendingApprovalsSection">
+
+      <div class="card-header">
+
+        <h3>Pending Approvals</h3>
+
+        <span class="badge" id="approvalCountBadge">
+          0 Items
+        </span>
+
+      </div>
+
+      <div id="pendingApprovalsList"></div>
+
+      <div
+        class="empty-state"
+        id="emptyApprovalsState"
+        style="display:none;"
+      >
+        No pending approvals.
+      </div>
+
+    </div>
+
+    <div class="card" id="activitySection">
+
+      <h3>Recent System Activity</h3>
+
+      <div id="activityList"></div>
+
+      <div
+        class="empty-state"
+        id="emptyActivityState"
+        style="display:none;"
+      >
+        No activity found.
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="officer-actions">
+
+    <button
+      class="btn primary"
+      id="manageOrganizationsBtn"
+    >
+      <i class="fa-solid fa-building"></i>
+      Manage Organizations
+    </button>
+
+    <button
+      class="btn outline"
+      id="userManagementBtn"
+    >
+      <i class="fa-solid fa-users"></i>
+      User Management
+    </button>
+
+    <button
+      class="btn outline"
+      id="systemSettingsBtn"
+    >
+      <i class="fa-solid fa-gear"></i>
+      System Settings
+    </button>
+
+    <button
+      class="btn outline"
+      id="viewReportsBtn"
+    >
+      <i class="fa-solid fa-chart-bar"></i>
+      View Reports
+    </button>
+
+  </section>
+
+  <template id="approvalTemplate">
+
+    <div class="approval-item">
+
+      <div>
+
+        <span class="tag small approval-type"></span>
+
+        <strong class="approval-title"></strong>
+
+        <p class="muted small approval-meta"></p>
+
+      </div>
+
+      <div class="actions">
+
+        <button class="btn approval-review-btn">
+          Review
+        </button>
+
+        <button class="btn approve approval-approve-btn">
+          Approve
+        </button>
+
+        <button class="btn decline approval-decline-btn">
+          Reject
+        </button>
+
+      </div>
+
+    </div>
+
+  </template>
+
+</main>
+
+<script>
+
+const adminToken =
+localStorage.getItem("token");
+
+let categoryChart =
+null;
+
+let growthChart =
+null;
+
+async function loadAdminDashboard(){
+
+try{
+
+const [
+orgResponse,
+eventResponse,
+orgRequestResponse,
+eventRequestResponse,
+userResponse
+] =
+await Promise.all([
+
+fetch("http://localhost:5000/api/organizations"),
+
+fetch("http://localhost:5000/api/events"),
+
+fetch(
+"http://localhost:5000/api/organizations/requests",
+{
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+),
+
+fetch(
+"http://localhost:5000/api/events/requests",
+{
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+),
+
+fetch(
+"http://localhost:5000/api/users",
+{
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+)
+
+]);
+
+const organizations =
+await orgResponse.json();
+
+const events =
+await eventResponse.json();
+
+const organizationRequests =
+await orgRequestResponse.json();
+
+const eventRequests =
+await eventRequestResponse.json();
+
+const users =
+await userResponse.json();
+
+const pendingOrganizationRequests =
+Array.isArray(organizationRequests)
+?
+organizationRequests.filter(request=>
+request.status === "pending"
+)
+:
+[];
+
+const pendingEventRequests =
+Array.isArray(eventRequests)
+?
+eventRequests.filter(request=>
+request.status === "pending"
+)
+:
+[];
+
+const pendingApprovals =
+[
+...pendingOrganizationRequests.map(request=>({
+
+type:"Organization",
+
+id:request.request_id,
+
+title:request.organization_name,
+
+meta:
+`${request.first_name || ""} ${request.last_name || ""} • ${
+new Date(request.submitted_at).toLocaleDateString()
+}`,
+
+approvalKind:"organization"
+
+})),
+
+...pendingEventRequests.map(request=>({
+
+type:"Event",
+
+id:request.event_id || request.request_id,
+
+title:request.title,
+
+meta:
+`${request.organization_name || "Organization"} • ${
+new Date(request.created_at || request.start_datetime).toLocaleDateString()
+}`,
+
+approvalKind:"event"
+
+}))
+
+];
+
+document.getElementById("totalOrgs").textContent =
+Array.isArray(organizations)
+?
+organizations.length
+:
+0;
+
+document.getElementById("totalStudents").textContent =
+Array.isArray(users)
+?
+users.filter(user=>
+user.system_role === "student"
+).length
+:
+0;
+
+document.getElementById("activeEvents").textContent =
+Array.isArray(events)
+?
+events.length
+:
+0;
+
+document.getElementById("pendingApprovals").textContent =
+pendingApprovals.length;
+
+document.getElementById("approvalCountBadge").textContent =
+`${pendingApprovals.length} Items`;
+
+renderPendingApprovals(
+pendingApprovals
+);
+
+renderSystemActivity(
+organizations,
+events,
+organizationRequests,
+eventRequests
+);
+
+renderGrowthChart(
+organizations,
+events,
+users
+);
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Failed loading admin dashboard");
+
+}
+
+}
+
+function renderPendingApprovals(pendingApprovals){
+
+const list =
+document.getElementById("pendingApprovalsList");
+
+const empty =
+document.getElementById("emptyApprovalsState");
+
+const template =
+document.getElementById("approvalTemplate");
+
+list.innerHTML =
+"";
+
+if(
+!Array.isArray(pendingApprovals)
+||
+pendingApprovals.length===0
+){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+pendingApprovals.forEach(item=>{
+
+const clone =
+template.content.cloneNode(true);
+
+clone.querySelector(".approval-type").textContent =
+item.type;
+
+clone.querySelector(".approval-title").textContent =
+item.title || "Untitled";
+
+clone.querySelector(".approval-meta").textContent =
+item.meta;
+
+const reviewBtn =
+clone.querySelector(".approval-review-btn");
+
+reviewBtn.addEventListener("click",()=>{
+
+if(item.approvalKind === "organization"){
+
+window.location.href =
+`admin-org-request-details.html?request_id=${item.id}`;
+
+}
+else{
+
+window.location.href =
+`admin-event-details.html?id=${item.id}`;
+
+}
+
+});
+
+const approveBtn =
+clone.querySelector(".approval-approve-btn");
+
+approveBtn.addEventListener("click",async()=>{
+
+await approveItem(item);
+
+});
+
+const rejectBtn =
+clone.querySelector(".approval-decline-btn");
+
+rejectBtn.addEventListener("click",async()=>{
+
+await rejectItem(item);
+
+});
+
+list.appendChild(clone);
+
+});
+
+}
+
+async function approveItem(item){
+
+let url =
+"";
+
+if(item.approvalKind === "organization"){
+
+url =
+`http://localhost:5000/api/organizations/${item.id}/approve`;
+
+}
+else if(item.approvalKind === "event"){
+
+url =
+`http://localhost:5000/api/events/${item.id}/approve`;
+
+}
+
+if(!url){
+return;
+}
+
+const response =
+await fetch(
+url,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+await loadAdminDashboard();
+
+await loadCategoryChart();
+
+}
+
+async function rejectItem(item){
+
+let url =
+"";
+
+if(item.approvalKind === "organization"){
+
+url =
+`http://localhost:5000/api/organizations/${item.id}/reject`;
+
+}
+else if(item.approvalKind === "event"){
+
+url =
+`http://localhost:5000/api/events/${item.id}/reject`;
+
+}
+
+if(!url){
+return;
+}
+
+const response =
+await fetch(
+url,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+await loadAdminDashboard();
+
+await loadCategoryChart();
+
+}
+
+async function loadCategoryChart(){
+
+try{
+
+const response =
+await fetch(
+"http://localhost:5000/api/admin/organization-categories",
+{
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+);
+
+const data =
+await response.json();
+
+const labels =
+Array.isArray(data)
+?
+data.map(item=>
+item.category || "Uncategorized"
+)
+:
+[];
+
+const values =
+Array.isArray(data)
+?
+data.map(item=>
+Number(item.total || 0)
+)
+:
+[];
+
+const ctx =
+document
+.getElementById("orgCategoryChart")
+.getContext("2d");
+
+if(categoryChart){
+
+categoryChart.destroy();
+
+}
+
+categoryChart =
+new Chart(ctx,{
+
+type:"pie",
+
+data:{
+
+labels:labels,
+
+datasets:[
+{
+data:values
+}
+]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+position:"bottom"
+}
+
+}
+
+}
+
+});
+
+}
+catch(error){
+
+console.log(error);
+
+}
+
+}
+
+function renderGrowthChart(
+organizations,
+events,
+users
+){
+
+const ctx =
+document
+.getElementById("platformGrowthChart")
+.getContext("2d");
+
+if(growthChart){
+
+growthChart.destroy();
+
+}
+
+growthChart =
+new Chart(ctx,{
+
+type:"bar",
+
+data:{
+
+labels:[
+"Organizations",
+"Students",
+"Events"
+],
+
+datasets:[
+{
+label:"Total",
+data:[
+Array.isArray(organizations) ? organizations.length : 0,
+Array.isArray(users)
+?
+users.filter(user=>
+user.system_role === "student"
+).length
+:
+0,
+Array.isArray(events) ? events.length : 0
+]
+}
+]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+display:false
+}
+
+},
+
+scales:{
+
+y:{
+beginAtZero:true,
+ticks:{
+precision:0
+}
+}
+
+}
+
+}
+
+});
+
+}
+
+function renderSystemActivity(
+organizations,
+events,
+organizationRequests,
+eventRequests
+){
+
+const activityList =
+document.getElementById("activityList");
+
+const empty =
+document.getElementById("emptyActivityState");
+
+activityList.innerHTML =
+"";
+
+const activities =
+[];
+
+if(Array.isArray(organizationRequests)){
+
+organizationRequests.slice(0,3).forEach(request=>{
+
+activities.push({
+title:"Organization Request",
+description:
+`${request.organization_name} • ${request.status}`
+});
+
+});
+
+}
+
+if(Array.isArray(events)){
+
+events.slice(0,3).forEach(event=>{
+
+activities.push({
+title:"Event",
+description:
+`${event.title} • ${event.organization_name || "Organization"}`
+});
+
+});
+
+}
+
+if(activities.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+activities.slice(0,5).forEach(activity=>{
+
+activityList.innerHTML +=
+`
+<div class="activity-item">
+  <strong>${activity.title}</strong>
+  <p class="muted small">${activity.description}</p>
+</div>
+`;
+
+});
+
+}
+
+document
+.getElementById("manageOrganizationsBtn")
+.addEventListener("click",()=>{
+
+window.location.href =
+"admin-organizations.html";
+
+});
+
+document
+.getElementById("userManagementBtn")
+.addEventListener("click",()=>{
+
+window.location.href =
+"admin-users.html";
+
+});
+
+document
+.getElementById("systemSettingsBtn")
+.addEventListener("click",()=>{
+
+alert("System settings can be added later.");
+
+});
+
+document
+.getElementById("viewReportsBtn")
+.addEventListener("click",()=>{
+
+alert("Reports page can be added later.");
+
+});
+
+loadAdminDashboard();
+
+loadCategoryChart();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

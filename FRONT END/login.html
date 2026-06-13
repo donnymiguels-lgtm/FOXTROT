@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - OrgHub</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="auth.css">
+
+  <!-- ICONS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body class="auth-body">
+
+  <div class="auth-container">
+
+    <!-- HEADER -->
+    <div class="auth-header">
+      <div class="logo-icon">
+        <i class="fa-solid fa-book"></i>
+      </div>
+      <h1>Welcome to OrgHub</h1>
+      <p>Student Organization Management System</p>
+    </div>
+
+    <!-- CARD -->
+    <div class="auth-card">
+      <h2>Sign In</h2>
+
+      <!-- EMAIL -->
+      <label>Email Address</label>
+      <div class="input-group">
+        <span class="input-icon"><i class="fa fa-envelope"></i></span>
+        <input type="email"  id="email" placeholder="student@university.edu">
+      </div>
+
+      <!-- PASSWORD -->
+      <label>Password</label>
+      <div class="input-group">
+        <span class="input-icon"><i class="fa fa-lock"></i></span>
+        <input type="password" id="password" placeholder="Enter your password">
+        <span class="input-icon right" id="togglePassword">
+          <i class="fa fa-eye"></i>
+        </span>
+      </div>
+
+      <!-- OPTIONS -->
+      <div class="auth-options">
+        <label class="remember">
+          <input type="checkbox">
+          <span>Remember me</span>
+        </label>
+
+        <a href="#" class="forgot">Forgot password?</a>
+      </div>
+
+      <!-- BUTTON -->
+<button
+class="btn full"
+id="loginButton"
+>
+
+Sign In
+
+</button>
+
+<!-- SWITCH -->
+<p class="switch">
+
+Don't have an account?
+
+<a href="register.html">
+
+Sign Up
+
+</a>
+
+</p>
+
+<hr>
+
+<p class="demo">
+
+Use your registered account credentials
+
+</p>
+    </div>
+
+  </div>
+
+  <!-- JS: PASSWORD TOGGLE -->
+  <script>
+    const toggle = document.getElementById("togglePassword");
+    const password = document.getElementById("password");
+
+    toggle.addEventListener("click", () => {
+      if (password.type === "password") {
+        password.type = "text";
+        toggle.innerHTML = '<i class="fa fa-eye-slash"></i>';
+      } else {
+        password.type = "password";
+        toggle.innerHTML = '<i class="fa fa-eye"></i>';
+      }
+    });
+
+
+    
+
+
+
+
+
+
+
+    const loginButton =
+document.getElementById(
+"loginButton"
+);
+
+loginButton.addEventListener(
+
+"click",
+
+async(e)=>{
+
+e.preventDefault();
+
+try{
+
+const email =
+document.getElementById(
+"email"
+).value;
+
+const password =
+document.getElementById(
+"password"
+).value;
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/auth/login",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":
+"application/json"
+
+},
+
+body:JSON.stringify({
+
+email,
+password
+
+})
+
+}
+
+);
+
+const data =
+await response.json();
+
+console.log(data);
+
+if(data.token){
+
+localStorage.setItem(
+"token",
+data.token
+);
+
+localStorage.setItem(
+"user",
+JSON.stringify(
+data.user
+)
+);
+
+console.log(
+"Login Success"
+);
+
+if(data.user.role==="admin"){
+
+window.location.href=
+"admin.html";
+
+}
+
+else{
+
+/*
+
+student +
+organization officers
+
+*/
+
+window.location.href=
+"index.html";
+
+}
+
+}
+
+else{
+
+alert(
+data.error ||
+"Invalid credentials"
+);
+
+}
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(
+"Login Failed"
+);
+
+}
+
+}
+
+);
+  </script>
+
+</body>
+</html>

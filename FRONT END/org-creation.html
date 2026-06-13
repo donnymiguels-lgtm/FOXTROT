@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Create Organization - OrgHub</title>
+
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="forms.css">
+
+<link rel="stylesheet"
+
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+
+<div class="logo">
+
+<div class="logo-icon">
+<i class="fa-solid fa-book"></i>
+</div>
+
+<div class="logo-text">
+
+<span class="logo-title">
+OrgHub
+</span>
+
+<span class="logo-sub">
+Student Organizations
+</span>
+
+</div>
+
+</div>
+
+
+<nav class="nav-links">
+
+<a href="index.html">
+<i class="fa-solid fa-chart-line"></i>
+<span>Dashboard</span>
+</a>
+
+<a href="organizations.html">
+<i class="fa-solid fa-building"></i>
+<span>Organizations</span>
+</a>
+
+<a href="events.html">
+<i class="fa-solid fa-calendar"></i>
+<span>Events</span>
+</a>
+
+<a href="my-orgs.html">
+
+<i class="fa-solid fa-user"></i>
+<span>My Orgs</span>
+
+</a>
+
+<a href="my-events.html">
+
+<i class="fa-solid fa-clipboard-list"></i>
+<span>My Events</span>
+
+</a>
+
+</nav>
+
+
+<div class="nav-right">
+
+<div class="student-badge">
+
+<i class="fa-solid fa-user"></i>
+
+<span></span>
+
+</div>
+
+<div class="profile"></div>
+
+<button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+
+</div>
+
+</header>
+
+
+
+<!-- MAIN -->
+
+<main
+class="container"
+id="createOrganizationPage"
+>
+
+<h1>Create New Organization</h1>
+
+<p class="subtitle">
+
+Fill out the form below to create
+a new student organization.
+
+</p>
+
+
+<section class="card">
+
+<form
+id="createOrganizationForm"
+novalidate
+>
+
+<!-- NAME -->
+
+<div class="form-group">
+
+<label for="organizationName">
+
+Organization Name *
+
+</label>
+
+<div class="input-icon">
+
+<i class="fa-regular fa-building"></i>
+
+<input
+type="text"
+id="organizationName"
+name="organizationName"
+placeholder="e.g. Robotics Engineering Society"
+required
+maxlength="100"
+/>
+
+</div>
+
+<p
+class="error-message"
+id="organizationNameError"
+></p>
+
+</div>
+
+
+
+<!-- CATEGORY -->
+
+<div class="form-group">
+
+<label for="organizationCategory">
+
+Category *
+
+</label>
+
+<select
+id="organizationCategory"
+name="organizationCategory"
+required
+>
+
+<option value="technology">
+Technology
+</option>
+
+<option value="academic">
+Academic
+</option>
+
+<option value="arts">
+Arts
+</option>
+
+<option value="service">
+Service
+</option>
+
+<option value="business">
+Business
+</option>
+
+<option value="sports">
+Sports
+</option>
+
+<option value="others">
+Others
+</option>
+
+</select>
+
+</div>
+
+
+
+<!-- CONTACT + LOCATION -->
+
+<div class="grid-2">
+
+<div class="form-group">
+
+<label for="contactEmail">
+
+Contact Email *
+
+</label>
+
+<div class="input-icon">
+
+<i class="fa-regular fa-envelope"></i>
+
+<input
+type="email"
+id="contactEmail"
+name="contactEmail"
+placeholder="org.name@university.edu"
+required
+/>
+
+</div>
+
+<p
+class="error-message"
+id="contactEmailError"
+></p>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label for="meetingLocation">
+
+Meeting Location *
+
+</label>
+
+<div class="input-icon">
+
+<i class="fa-solid fa-location-dot"></i>
+
+<input
+type="text"
+id="meetingLocation"
+name="meetingLocation"
+placeholder="Engineering Building Room 301"
+required
+/>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- EXPECTED MEMBERS -->
+
+<div class="form-group">
+
+<label for="expectedMembers">
+
+Expected Number of Members
+
+</label>
+
+<div class="input-icon">
+
+<i class="fa-solid fa-users"></i>
+
+<input
+type="number"
+id="expectedMembers"
+name="expectedMembers"
+min="1"
+placeholder="0"
+/>
+
+</div>
+
+</div>
+
+
+
+<!-- DESCRIPTION -->
+
+<div class="form-group">
+
+<label for="organizationDescription">
+
+Description *
+
+</label>
+
+<textarea
+id="organizationDescription"
+name="organizationDescription"
+rows="6"
+maxlength="1000"
+placeholder="Provide a brief description of your organization..."
+required
+></textarea>
+
+<p
+class="char-counter"
+id="descriptionCounter"
+>
+
+0 / 1000
+
+</p>
+
+</div>
+
+
+
+<!-- MISSION -->
+
+<div class="form-group">
+
+<label for="missionStatement">
+
+Mission Statement *
+
+</label>
+
+<textarea
+id="missionStatement"
+name="missionStatement"
+rows="5"
+maxlength="1000"
+placeholder="What is the main goal or purpose of your organization?"
+required
+></textarea>
+
+<p
+class="char-counter"
+id="missionCounter"
+>
+
+0 / 1000
+
+</p>
+
+</div>
+
+
+
+<!-- FILES -->
+
+<div class="form-group">
+
+<label for="organizationLogo">
+
+Organization Logo (Optional)
+
+</label>
+
+<input
+type="file"
+id="organizationLogo"
+name="organizationLogo"
+accept=".png,.jpg,.jpeg,.webp"
+/>
+
+</div>
+
+
+
+<!-- NOTICE -->
+
+<div
+class="notice-box"
+id="approvalNotice"
+>
+
+<strong>
+
+Note:
+
+</strong>
+
+Your organization will be reviewed
+before becoming active.
+
+You'll receive updates once
+administrators process your request.
+
+</div>
+
+
+
+<!-- BUTTONS -->
+
+<div class="form-actions">
+
+<button
+type="submit"
+class="btn primary"
+id="submitOrganizationBtn"
+>
+
+Submit for Approval
+
+</button>
+
+
+<button
+type="button"
+class="btn outline"
+id="cancelCreateOrganizationBtn"
+>
+
+Cancel
+
+</button>
+
+</div>
+
+
+</form>
+
+</section>
+
+</main>
+
+
+<script>
+
+const form =
+document.getElementById(
+"createOrganizationForm"
+);
+
+form.addEventListener(
+
+"submit",
+
+async(e)=>{
+
+e.preventDefault();
+
+try{
+
+const token=
+localStorage.getItem(
+"token"
+);
+
+
+const response=
+await fetch(
+
+"http://localhost:5000/api/organizations",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":
+"application/json",
+
+Authorization:
+`Bearer ${token}`
+
+},
+
+body:JSON.stringify({
+
+name:
+
+document.getElementById(
+"organizationName"
+).value,
+
+category:
+
+document.getElementById(
+"organizationCategory"
+).value,
+
+contact_email:
+
+document.getElementById(
+"contactEmail"
+).value,
+
+location:
+
+document.getElementById(
+"meetingLocation"
+).value,
+
+description:
+
+document.getElementById(
+"organizationDescription"
+).value
+
+})
+
+}
+
+);
+
+
+const data=
+await response.json();
+
+console.log(response);
+
+console.log(data);
+
+
+if(response.ok){
+
+alert(
+data.message
+);
+
+window.location.href=
+"organizations.html";
+
+}
+
+else{
+
+alert(
+data.error
+);
+
+}
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(
+"Submission failed"
+);
+
+}
+
+}
+
+);
+
+
+
+document.getElementById(
+
+"cancelCreateOrganizationBtn"
+
+)
+
+.addEventListener(
+
+"click",
+
+()=>{
+
+window.location.href=
+"organizations.html";
+
+}
+
+);
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

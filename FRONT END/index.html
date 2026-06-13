@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OrgHub Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+  <nav class="nav-links">
+
+    <a href="index.html" class="active">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+    <a href="my-orgs.html">
+      <i class="fa-solid fa-user"></i>
+      <span>My Orgs</span>
+    </a>
+
+    <a href="my-events.html">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <span>My Events</span>
+    </a>
+
+  </nav>
+  <div class="nav-right">
+    <div class="student-badge" id="roleBadge">
+      <i class="fa-solid fa-user"></i>
+      <span id="roleText">Student</span>
+    </div>
+
+    <div class="profile" id="profileInitials">  </div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main
+ class="container"
+ id="studentDashboard"
+>
+
+  <h1>Student Dashboard</h1>
+  <p class="subtitle">Welcome back! Here's what's happening.</p>
+
+  <!-- STATS -->
+  <div class="stats">
+
+  <!-- My Organizations -->
+  <div class="stat-card">
+    <div class="stat-text">
+      <h4>My Organizations</h4>
+      <h2 id="myOrgCount">0</h2>
+    </div>
+
+    <div class="stat-icon blue">
+      <i class="fa-solid fa-user"></i>
+    </div>
+  </div>
+
+  <!-- Upcoming Events -->
+  <div class="stat-card">
+    <div class="stat-text">
+      <h4>Upcoming Events</h4>
+      <h2 id="upcomingEventsCount">0</h2>
+    </div>
+
+    <div class="stat-icon purple">
+      <i class="fa-solid fa-calendar"></i>
+    </div>
+  </div>
+
+  <!-- Attendance Rate -->
+  <div class="stat-card">
+    <div class="stat-text">
+      <h4>Attendance Rate</h4>
+      <h2 id="attendanceRate">0%</h2>
+    </div>
+
+    <div class="stat-icon green">
+      <i class="fa-solid fa-chart-line"></i>
+    </div>
+  </div>
+
+</div>
+
+  <!-- CONTENT GRID -->
+  <section class="grid-2">
+
+      <!-- MY ORGS -->
+  <div class="card">
+    <h3>My Organizations</h3>
+
+    <div id="myOrgsList"></div>
+
+    <a
+    class="browse"
+    href="organizations.html"
+    >
+
+    + Browse Organizations
+
+    </a>
+
+    <div
+      class="empty-state"
+      id="emptyMyOrgs"
+      style="display:none;"
+    >
+
+    No organizations joined.
+
+    </div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="card">
+    <h3>Upcoming Events</h3>
+
+    <div id="upcomingEventsList"></div>
+
+    <div
+      class="empty-state"
+      id="emptyEvents"
+      style="display:none;"
+    >
+
+    No upcoming events.
+
+    </div>
+
+  </div>
+
+</section>
+
+<section class="card">
+
+  <h3>Latest Announcements</h3>
+
+  <div id="announcementsList"></div>
+
+  <div
+    class="empty-state"
+    id="emptyAnnouncements"
+    style="display:none;"
+  >
+    No announcements available.
+  </div>
+
+</section>
+
+<section
+  class="card"
+  id="recommendedSection"
+>
+  <h3>Recommended for You</h3>
+
+  <div class="org-grid" id="recommendedOrgs"></div>
+
+  <div
+  class="empty-state"
+  id="emptyRecommended"
+  style="display:none;"
+>
+  No recommendations available.
+</div>
+
+
+</section>
+
+  <template id="orgTemplate">
+
+  <div class="mini-card">
+
+  <div>
+
+  <strong class="org-name"></strong>
+
+  <p class="org-role"></p>
+
+  </div>
+
+  <span class="link org-events"></span>
+
+  </div>
+  
+  </template>
+
+  <template id="eventTemplate">
+
+
+  <div class="mini-card">
+
+  <strong class="event-name"></strong>
+
+  <p class="event-date"></p>
+
+  </div>
+
+  </template>
+
+
+  <template id="recommendedOrgTemplate">
+
+  <div class="card org-card">
+
+  <h4 class="recommended-name"></h4>
+
+  <p class="org-meta"></p>
+
+  <button
+    class="btn join-org-btn"
+    data-org-id=""
+  >
+
+  Join
+
+  </button>
+
+  </div>
+
+  </template>
+
+  
+
+</main>
+<script>
+
+const token =
+localStorage.getItem("token");
+
+const user =
+JSON.parse(
+localStorage.getItem("user")
+);
+
+async function loadDashboard(){
+
+try{
+
+/* MY ORGANIZATIONS */
+
+const orgResponse=
+await fetch(
+
+"http://localhost:5000/api/organizations/my-organizations",
+
+{
+
+headers:{
+
+Authorization:
+`Bearer ${token}`
+
+}
+
+}
+
+);
+
+const myOrgs=
+await orgResponse.json();
+
+
+
+document.getElementById(
+"myOrgCount"
+).textContent=
+myOrgs.length;
+
+
+
+const orgList=
+document.getElementById(
+"myOrgsList"
+);
+
+orgList.innerHTML="";
+
+
+myOrgs.forEach(org=>{
+
+orgList.innerHTML+=`
+
+<div class="mini-card">
+
+<div>
+
+<strong>${org.name}</strong>
+
+<p>${org.organization_role}</p>
+
+</div>
+
+<span class="link">
+
+Member
+
+</span>
+
+</div>
+
+`;
+
+});
+
+
+/* RECOMMENDED ORGANIZATIONS */
+
+const allOrgResponse =
+await fetch(
+"http://localhost:5000/api/organizations"
+);
+
+const allOrganizations =
+await allOrgResponse.json();
+
+const myOrgIds =
+myOrgs.map(org=>
+String(org.organization_id)
+);
+
+const myCategories =
+myOrgs.map(org=>
+String(org.category || "").toLowerCase()
+);
+
+const notJoinedOrganizations =
+allOrganizations.filter(org=>
+!myOrgIds.includes(
+String(org.organization_id)
+)
+);
+
+const recommendedOrganizations =
+notJoinedOrganizations.map(org=>{
+
+let score = 0;
+
+const orgCategory =
+String(org.category || "").toLowerCase();
+
+if(myCategories.includes(orgCategory)){
+
+score += 50;
+
+}
+
+if(Number(org.member_count || 0) >= 10){
+
+score += 20;
+
+}
+
+if(Number(org.event_count || 0) > 0){
+
+score += 15;
+
+}
+
+if(Number(org.announcement_count || 0) > 0){
+
+score += 10;
+
+}
+
+return {
+...org,
+recommendation_score: score
+};
+
+})
+.sort((a,b)=>
+b.recommendation_score -
+a.recommendation_score
+)
+.slice(0,3);
+
+const recommendedList =
+document.getElementById(
+"recommendedOrgs"
+);
+
+recommendedList.innerHTML =
+"";
+
+const emptyRecommended =
+document.getElementById(
+"emptyRecommended"
+);
+
+if(recommendedOrganizations.length===0){
+
+emptyRecommended.style.display =
+"block";
+
+}
+else{
+
+emptyRecommended.style.display =
+"none";
+
+}
+
+recommendedOrganizations.forEach(org=>{
+
+recommendedList.innerHTML += `
+
+<div class="card org-card">
+
+<h4>${org.name}</h4>
+
+<p class="org-meta">
+${org.category || "General"}
+</p>
+
+<p class="org-meta">
+Recommendation Score: ${org.recommendation_score}
+</p>
+
+<p class="org-meta">
+${org.description || ""}
+</p>
+
+<button
+class="btn join-org-btn"
+data-org-id="${org.organization_id}"
+>
+Join
+</button>
+
+</div>
+
+`;
+
+});
+
+
+/* EVENTS */
+
+const eventResponse=
+await fetch(
+
+"http://localhost:5000/api/events"
+
+);
+
+const events=
+await eventResponse.json();
+
+
+document.getElementById(
+"upcomingEventsCount"
+).textContent=
+events.length;
+
+
+const eventList=
+document.getElementById(
+"upcomingEventsList"
+);
+
+eventList.innerHTML="";
+
+
+events.forEach(event=>{
+
+eventList.innerHTML+=`
+
+<div class="mini-card">
+
+<strong>
+
+${event.title}
+
+</strong>
+
+<p>
+
+${event.start_datetime}
+
+</p>
+
+</div>
+
+`;
+
+});
+
+/* ATTENDANCE RATE */
+
+const attendanceResponse =
+await fetch(
+
+"http://localhost:5000/api/events/my-attendance-rate",
+
+{
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+
+);
+
+const attendanceData =
+await attendanceResponse.json();
+
+document.getElementById(
+"attendanceRate"
+).textContent =
+`${attendanceData.attendance_rate || 0}%`;
+
+/* ANNOUNCEMENTS */
+
+const announcementResponse =
+await fetch(
+
+"http://localhost:5000/api/announcements/my-orgs",
+
+{
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+
+);
+
+const announcements =
+await announcementResponse.json();
+
+const announcementsList =
+document.getElementById(
+"announcementsList"
+);
+
+const emptyAnnouncements =
+document.getElementById(
+"emptyAnnouncements"
+);
+
+announcementsList.innerHTML =
+"";
+
+if(
+!Array.isArray(announcements)
+||
+announcements.length===0
+){
+
+emptyAnnouncements.style.display =
+"block";
+
+}
+else{
+
+emptyAnnouncements.style.display =
+"none";
+
+announcements.forEach(announcement=>{
+
+announcementsList.innerHTML +=
+
+`
+
+<div class="mini-card">
+
+<div>
+
+<strong>
+${announcement.title}
+</strong>
+
+<p>
+${announcement.organization_name}
+</p>
+
+<p class="muted">
+
+${announcement.content}
+
+</p>
+
+<p class="muted small">
+
+Posted by
+${announcement.first_name}
+${announcement.last_name}
+
+•
+
+${new Date(
+announcement.created_at
+).toLocaleString()}
+
+</p>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+
+}
+
+
+}
+
+catch(error){
+
+console.log(error);
+
+}
+
+}
+
+function loadUserUI(){
+
+if(!user)return;
+
+document.getElementById(
+"roleText"
+).textContent=
+user.role;
+
+
+document.getElementById(
+"profileInitials"
+).textContent=
+user.name
+.substring(0,2)
+.toUpperCase();
+
+}
+
+loadUserUI();
+
+loadDashboard();
+
+document.addEventListener(
+"click",
+async(e)=>{
+
+const button =
+e.target.closest(
+".join-org-btn"
+);
+
+if(!button){
+return;
+}
+
+const organizationId =
+button.dataset.orgId;
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/organizations/${organizationId}/join`,
+
+{
+method:"POST",
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadDashboard();
+
+}
+);
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+<!-- Frontend module finalized --> 
+</body>
+</html>

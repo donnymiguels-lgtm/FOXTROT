@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Organization Request Review - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="admin.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="admin-organizations.html" class="active">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="admin-events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge admin-badge" id="roleBadge">
+      <i class="fa-solid fa-user-shield"></i>
+      <span id="roleText">Admin</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+  </div>
+
+</header>
+
+<main class="container">
+
+  <div class="back" id="backBtn">
+    <i class="fa-solid fa-arrow-left"></i>
+    Back to Organization Requests
+  </div>
+
+  <section class="card org-details">
+
+    <div class="org-top">
+
+      <div>
+        <h2 id="organizationName">Loading...</h2>
+
+        <div class="org-meta-row">
+          <span class="tag" id="organizationCategory">Category</span>
+          <span class="status" id="requestStatus">Status</span>
+        </div>
+      </div>
+
+      <div class="event-buttons" id="adminActionButtons">
+
+        <button class="btn approve" id="approveRequestBtn">
+          <i class="fa-solid fa-check"></i>
+          Approve
+        </button>
+
+        <button class="btn decline" id="rejectRequestBtn">
+          <i class="fa-solid fa-xmark"></i>
+          Reject
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="org-stats">
+
+      <div class="stat-box">
+        <i class="fa-solid fa-building"></i>
+        <div>
+          <p>Request ID</p>
+          <strong id="requestId">Loading...</strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <i class="fa-solid fa-user"></i>
+        <div>
+          <p>Submitted By</p>
+          <strong id="submittedBy">Loading...</strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <i class="fa-solid fa-calendar"></i>
+        <div>
+          <p>Submitted Date</p>
+          <strong id="submittedDate">Loading...</strong>
+        </div>
+      </div>
+
+      <div class="stat-box">
+        <i class="fa-solid fa-circle-info"></i>
+        <div>
+          <p>Status</p>
+          <strong id="statusText">Loading...</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="org-section">
+      <h3>
+        <i class="fa-solid fa-clipboard-check"></i>
+        Request Summary
+      </h3>
+
+      <p class="muted">
+        This organization request was submitted for admin review.
+      </p>
+
+      <p class="muted">
+        <strong>Organization Name:</strong>
+        <span id="summaryName"></span>
+      </p>
+
+      <p class="muted">
+        <strong>Category:</strong>
+        <span id="summaryCategory"></span>
+      </p>
+
+      <p class="muted">
+        <strong>Submitted By:</strong>
+        <span id="summarySubmittedBy"></span>
+      </p>
+
+      <p class="muted">
+        <strong>Status:</strong>
+        <span id="summaryStatus"></span>
+      </p>
+
+      <p class="muted">
+  <strong>Description:</strong>
+  <span id="summaryDescription"></span>
+</p>
+
+<p class="muted">
+  <strong>Location:</strong>
+  <span id="summaryLocation"></span>
+</p>
+
+<p class="muted">
+  <strong>Contact Email:</strong>
+  <span id="summaryContactEmail"></span>
+</p>
+
+<p class="muted">
+  <strong>Submitted By Email:</strong>
+  <span id="summarySubmittedEmail"></span>
+</p>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+const adminToken =
+localStorage.getItem("token");
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const requestId =
+params.get("request_id");
+
+let currentRequest =
+null;
+
+document
+.getElementById("backBtn")
+.addEventListener("click",()=>{
+
+window.location.href =
+"admin-organizations.html";
+
+});
+
+async function loadRequestDetails(){
+
+if(!requestId){
+
+alert("No request selected");
+
+window.location.href =
+"admin-organizations.html";
+
+return;
+
+}
+
+try{
+
+const response =
+await fetch(
+"http://localhost:5000/api/organizations/requests",
+{
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+);
+
+const requests =
+await response.json();
+
+currentRequest =
+requests.find(request=>
+String(request.request_id) === String(requestId)
+);
+
+if(!currentRequest){
+
+alert("Request not found");
+
+window.location.href =
+"admin-organizations.html";
+
+return;
+
+}
+
+renderRequest(currentRequest);
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Failed loading organization request");
+
+}
+
+}
+
+function renderRequest(request){
+
+document.title =
+`${request.organization_name} - Request Review`;
+
+const submittedBy =
+`${request.first_name || ""} ${request.last_name || ""}`.trim()
+||
+`User #${request.submitted_by || "Unknown"}`;
+
+document.getElementById("organizationName").textContent =
+request.organization_name || "Unnamed Organization";
+
+document.getElementById("organizationCategory").textContent =
+request.category || "General";
+
+document.getElementById("requestStatus").textContent =
+request.status || "Unknown";
+
+document.getElementById("requestId").textContent =
+request.request_id;
+
+document.getElementById("submittedBy").textContent =
+submittedBy;
+
+document.getElementById("submittedDate").textContent =
+new Date(request.submitted_at).toLocaleDateString();
+
+document.getElementById("statusText").textContent =
+request.status || "Unknown";
+
+document.getElementById("summaryName").textContent =
+request.organization_name || "Unnamed Organization";
+
+document.getElementById("summaryCategory").textContent =
+request.category || "General";
+
+document.getElementById("summarySubmittedBy").textContent =
+submittedBy;
+
+document.getElementById("summaryStatus").textContent =
+request.status || "Unknown";
+
+document.getElementById("summaryDescription").textContent =
+request.description || "No description provided.";
+
+document.getElementById("summaryLocation").textContent =
+request.location || "No location provided.";
+
+document.getElementById("summaryContactEmail").textContent =
+request.contact_email || "No contact email provided.";
+
+document.getElementById("summarySubmittedEmail").textContent =
+request.email || "No user email available.";
+
+const actionButtons =
+document.getElementById("adminActionButtons");
+
+if(request.status !== "pending"){
+
+actionButtons.style.display =
+"none";
+
+}
+else{
+
+actionButtons.style.display =
+"flex";
+
+}
+
+}
+
+document
+.getElementById("approveRequestBtn")
+.addEventListener("click",async()=>{
+
+const confirmApprove =
+confirm("Approve this organization request?");
+
+if(!confirmApprove){
+return;
+}
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/organizations/${requestId}/approve`,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadRequestDetails();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Approval failed");
+
+}
+
+});
+
+document
+.getElementById("rejectRequestBtn")
+.addEventListener("click",async()=>{
+
+const confirmReject =
+confirm("Reject this organization request?");
+
+if(!confirmReject){
+return;
+}
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/organizations/${requestId}/reject`,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${adminToken}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadRequestDetails();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Rejection failed");
+
+}
+
+});
+
+loadRequestDetails();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

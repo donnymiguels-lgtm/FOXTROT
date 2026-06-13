@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Events - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<header class="navbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+
+    <a href="index.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+    <a href="my-orgs.html">
+      <i class="fa-solid fa-user"></i>
+      <span>My Orgs</span>
+    </a>
+
+    <a href="my-events.html" class="active">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <span>My Events</span>
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge" id="roleBadge">
+      <i class="fa-solid fa-user"></i>
+      <span id="roleText">Student</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+  </div>
+</header>
+
+<main class="container">
+
+  <h1>My Events</h1>
+
+  <p class="subtitle">
+    Events you're registered to attend.
+  </p>
+
+  <div id="myEventsList"></div>
+
+  <div
+    class="empty-state"
+    id="emptyMyEvents"
+    style="display:none;"
+  >
+    You are not registered for any events yet.
+  </div>
+
+  <template id="myEventTemplate">
+
+    <div class="card myevent-card">
+
+      <div class="event-left">
+
+        <div class="date-box">
+          <strong class="event-day"></strong>
+          <span class="event-month"></span>
+        </div>
+
+        <div class="event-info">
+
+          <h3 class="event-title"></h3>
+
+          <p class="muted event-org"></p>
+
+          <p class="event-desc"></p>
+
+          <div class="event-details">
+
+            <span class="event-time"></span>
+
+            <span class="event-location"></span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <span class="tag event-category"></span>
+
+      <div class="event-footer">
+
+        <p class="muted small registered-date"></p>
+
+        <div class="event-buttons">
+
+          <button class="btn view-btn">
+            View Details
+          </button>
+
+          <button class="btn outline cancel-btn">
+            Cancel Registration
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </template>
+
+</main>
+
+<script>
+
+const pageToken =
+localStorage.getItem(
+"token"
+);
+
+async function loadMyEvents(){
+
+try{
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/events/my-events",
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const events =
+await response.json();
+
+const container =
+document.getElementById(
+"myEventsList"
+);
+
+const empty =
+document.getElementById(
+"emptyMyEvents"
+);
+
+const template =
+document.getElementById(
+"myEventTemplate"
+);
+
+container.innerHTML =
+"";
+
+if(!Array.isArray(events) || events.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+events.forEach(event=>{
+
+const clone =
+template.content.cloneNode(
+true
+);
+
+const start =
+new Date(
+event.start_datetime
+);
+
+clone.querySelector(
+".event-day"
+).textContent =
+start.getDate();
+
+clone.querySelector(
+".event-month"
+).textContent =
+start.toLocaleString(
+"default",
+{
+month:"short"
+}
+).toUpperCase();
+
+clone.querySelector(
+".event-title"
+).textContent =
+event.title;
+
+clone.querySelector(
+".event-org"
+).textContent =
+event.organization_name;
+
+clone.querySelector(
+".event-desc"
+).textContent =
+event.description ||
+"No description available.";
+
+clone.querySelector(
+".event-time"
+).textContent =
+"⏰ " +
+start.toLocaleString();
+
+clone.querySelector(
+".event-location"
+).textContent =
+"📍 " +
+(event.location || "No location");
+
+clone.querySelector(
+".event-category"
+).textContent =
+event.category ||
+"event";
+
+clone.querySelector(
+".registered-date"
+).textContent =
+"Registered on " +
+new Date(
+event.registered_at
+).toLocaleDateString();
+
+clone.querySelector(
+".view-btn"
+).dataset.eventId =
+event.event_id;
+
+clone.querySelector(
+".view-btn"
+).addEventListener(
+"click",
+()=>{
+
+window.location.href =
+`event-details.html?id=${event.event_id}`;
+
+}
+);
+
+const cancelBtn =
+clone.querySelector(
+".cancel-btn"
+);
+
+cancelBtn.dataset.eventId =
+event.event_id;
+
+cancelBtn.addEventListener(
+
+"click",
+
+async()=>{
+
+await cancelRegistration(
+event.event_id
+);
+
+}
+
+);
+
+container.appendChild(
+clone
+);
+
+});
+
+}
+
+catch(error){
+
+console.log(error);
+
+alert(
+"Failed loading your events"
+);
+
+}
+
+}
+
+async function cancelRegistration(eventId){
+
+const confirmCancel =
+confirm(
+"Cancel your registration for this event?"
+);
+
+if(!confirmCancel){
+
+return;
+
+}
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/events/${eventId}/register`,
+
+{
+method:"DELETE",
+
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadMyEvents();
+
+}
+
+loadMyEvents();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

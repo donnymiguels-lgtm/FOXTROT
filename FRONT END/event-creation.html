@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Create Event - OrgHub</title>
+
+<link rel="stylesheet" href="styles.css">
+
+<link rel="stylesheet" href="forms.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+
+
+<!-- NAVBAR -->
+<header class="navbar">
+
+<div class="logo">
+
+<div class="logo-icon">
+<i class="fa-solid fa-book"></i>
+</div>
+
+<div class="logo-text">
+
+<span class="logo-title">
+OrgHub
+</span>
+
+<span class="logo-sub">
+Student Organizations
+</span>
+
+</div>
+
+</div>
+
+
+<nav class="nav-links">
+
+<a href="index.html">
+<i class="fa-solid fa-chart-line"></i>
+<span>Dashboard</span>
+</a>
+
+<a href="organizations.html">
+<i class="fa-solid fa-building"></i>
+<span>Organizations</span>
+</a>
+
+<a href="events.html">
+<i class="fa-solid fa-calendar"></i>
+<span>Events</span>
+</a>
+
+<a href="my-orgs.html">
+
+<i class="fa-solid fa-user"></i>
+<span>My Orgs</span>
+
+</a>
+
+<a href="my-events.html">
+
+<i class="fa-solid fa-clipboard-list"></i>
+<span>My Events</span>
+
+</a>
+
+</nav>
+
+
+<div class="nav-right">
+
+<div class="student-badge">
+
+<i class="fa-solid fa-user"></i>
+
+<span></span>
+
+</div>
+
+<div class="profile"></div>
+
+<button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+
+</div>
+
+</header>
+
+
+<!-- MAIN -->
+
+<main
+class="container"
+id="createEventPage"
+data-org-id="1"
+>
+
+<h1>Create New Event</h1>
+
+<p class="subtitle">
+
+Fill out the form below to create
+a new event for your organization.
+
+</p>
+
+
+<section class="card">
+
+<form
+id="createEventForm"
+novalidate
+>
+
+<!-- EVENT TITLE -->
+
+<div class="form-group">
+
+<label for="eventTitle">
+
+Event Title *
+
+</label>
+
+<div class="input-icon">
+
+<i class="fa-regular fa-calendar"></i>
+
+<input
+type="text"
+id="eventTitle"
+name="title"
+placeholder="e.g. Spring Hackathon 2026"
+required
+maxlength="120"
+/>
+
+</div>
+
+<p
+class="error-message"
+id="eventTitleError"
+></p>
+
+</div>
+
+
+
+<!-- ORGANIZATION -->
+
+<div class="form-group">
+
+<label for="eventOrganization">
+
+Organization *
+
+</label>
+
+<select
+id="eventOrganization"
+name="organizationId"
+required
+>
+
+<option value="">
+Select Organization
+</option>
+
+</select>
+
+<p class="muted small">
+
+Select the organization hosting this event
+
+</p>
+
+</div>
+
+
+
+<!-- DATES -->
+
+<div class="grid-2">
+
+<div class="form-group">
+
+<label for="eventDate">
+
+Event Date *
+
+</label>
+
+<input
+type="date"
+id="eventDate"
+name="eventDate"
+required
+/>
+
+</div>
+
+
+<div class="form-group">
+
+<label for="registrationDeadline">
+
+Registration Deadline
+
+</label>
+
+<input
+type="date"
+id="registrationDeadline"
+name="registrationDeadline"
+/>
+
+</div>
+
+</div>
+
+
+
+<!-- TIME -->
+
+<div class="grid-2">
+
+<div class="form-group">
+
+<label for="startTime">
+
+Start Time *
+
+</label>
+
+<input
+type="time"
+id="startTime"
+name="startTime"
+required
+/>
+
+</div>
+
+
+<div class="form-group">
+
+<label for="endTime">
+
+End Time *
+
+</label>
+
+<input
+type="time"
+id="endTime"
+name="endTime"
+required
+/>
+
+</div>
+
+</div>
+
+
+
+<!-- LOCATION + CATEGORY -->
+
+<div class="grid-2">
+
+<div class="form-group">
+
+<label for="eventLocation">
+
+Location *
+
+</label>
+
+<div class="input-icon">
+
+<i class="fa-solid fa-location-dot"></i>
+
+<input
+type="text"
+id="eventLocation"
+name="location"
+placeholder="Engineering Building Room 301"
+required
+/>
+
+</div>
+
+</div>
+
+
+
+<div class="form-group">
+
+<label for="eventCategory">
+
+Category *
+
+</label>
+
+<select
+id="eventCategory"
+name="category"
+required
+>
+
+<option value="workshop">
+Workshop
+</option>
+
+<option value="competition">
+Competition
+</option>
+
+<option value="seminar">
+Seminar
+</option>
+
+<option value="service">
+Service
+</option>
+
+<option value="meeting">
+Meeting
+</option>
+
+<option value="others">
+Others
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+
+<!-- CAPACITY -->
+
+<div class="form-group">
+
+<label for="maximumCapacity">
+
+Maximum Capacity
+
+</label>
+
+<div class="input-icon">
+
+<i class="fa-solid fa-users"></i>
+
+<input
+type="number"
+id="maximumCapacity"
+name="maximumCapacity"
+placeholder="e.g. 100"
+min="1"
+/>
+
+</div>
+
+<p class="muted small">
+
+Leave blank for unlimited capacity
+
+</p>
+
+</div>
+
+
+
+<!-- DESCRIPTION -->
+
+<div class="form-group">
+
+<label for="eventDescription">
+
+Event Description *
+
+</label>
+
+<textarea
+id="eventDescription"
+name="description"
+rows="6"
+maxlength="2000"
+placeholder="Provide a detailed description of your event..."
+required
+></textarea>
+
+</div>
+
+
+
+<!-- AGENDA -->
+
+<div class="form-group">
+
+<label for="eventAgenda">
+
+Event Agenda / Schedule
+
+</label>
+
+<textarea
+id="eventAgenda"
+name="agenda"
+rows="5"
+placeholder="9:00 AM - Registration&#10;10:00 AM - Opening Ceremony"
+></textarea>
+
+</div>
+
+
+
+<!-- REQUIREMENTS -->
+
+<div class="form-group">
+
+<label for="eventRequirements">
+
+Requirements / What to Bring
+
+</label>
+
+<textarea
+id="eventRequirements"
+name="requirements"
+rows="4"
+placeholder="Laptop, Student ID, Resume"
+></textarea>
+
+</div>
+
+
+
+<hr>
+
+
+
+<h3>
+
+Contact Information
+
+</h3>
+
+
+<div class="grid-3">
+
+<div class="form-group">
+
+<label for="contactName">
+
+Contact Name *
+
+</label>
+
+<input
+type="text"
+id="contactName"
+name="contactName"
+required
+/>
+
+</div>
+
+
+<div class="form-group">
+
+<label for="contactEmail">
+
+Contact Email *
+
+</label>
+
+<input
+type="email"
+id="contactEmail"
+name="contactEmail"
+required
+/>
+
+</div>
+
+
+<div class="form-group">
+
+<label for="contactPhone">
+
+Contact Phone
+
+</label>
+
+<input
+type="text"
+id="contactPhone"
+name="contactPhone"
+/>
+
+</div>
+
+</div>
+
+
+
+<hr>
+
+
+<h3>
+
+Registration
+
+</h3>
+
+
+<div class="checkbox-group">
+
+<input
+type="checkbox"
+id="requiresRegistration"
+name="requiresRegistration"
+/>
+
+<label for="requiresRegistration">
+
+This event requires registration
+
+</label>
+
+</div>
+
+
+
+<!-- IMAGE -->
+
+<div class="form-group">
+
+<label for="eventBanner">
+
+Event Banner (Optional)
+
+</label>
+
+<input
+type="file"
+id="eventBanner"
+name="eventBanner"
+accept=".jpg,.png,.jpeg,.webp"
+/>
+
+</div>
+
+
+
+<div
+class="notice-box"
+id="approvalNotice"
+>
+
+<strong>
+
+Note:
+
+</strong>
+
+Your event will be reviewed
+before becoming visible to students.
+
+</div>
+
+
+
+<div class="form-actions">
+
+<button
+type="submit"
+class="btn primary"
+id="submitEventBtn"
+>
+
+Submit for Approval
+
+</button>
+
+
+<button
+type="button"
+class="btn outline"
+id="cancelEventBtn"
+>
+
+Cancel
+
+</button>
+
+</div>
+
+</form>
+
+</section>
+
+</main>
+
+<script>
+
+const pageToken =
+localStorage.getItem(
+"token"
+);
+
+const params=
+new URLSearchParams(
+window.location.search
+);
+
+const selectedOrgId=
+params.get(
+"org"
+);
+
+async function loadOrganizations(){
+
+const response =
+await fetch(
+
+"http://localhost:5000/api/organizations/my-organizations",
+
+{
+
+headers:{
+
+Authorization:
+`Bearer ${pageToken}`
+
+}
+
+}
+
+);
+
+if(!response.ok){
+
+alert(
+"Failed loading organizations"
+);
+
+return;
+
+}
+
+const organizations =
+await response.json();
+
+const select =
+document.getElementById(
+"eventOrganization"
+);
+
+organizations.forEach(org=>{
+
+const isSelected=
+
+String(org.organization_id)===
+
+String(selectedOrgId)
+
+?
+
+"selected"
+
+:
+
+"";
+
+select.innerHTML += `
+
+<option
+
+value="${org.organization_id}"
+
+${isSelected}
+
+>
+
+${org.name}
+
+</option>
+
+`;
+
+});
+
+}
+
+loadOrganizations();
+document
+.getElementById(
+"createEventForm"
+)
+.addEventListener(
+
+"submit",
+
+async(e)=>{
+
+e.preventDefault();
+
+const form =
+new FormData(e.target);
+
+const eventDate =
+form.get("eventDate");
+
+const startTime =
+form.get("startTime");
+
+const endTime =
+form.get("endTime");
+
+if(
+!eventDate ||
+!startTime ||
+!endTime
+){
+
+alert(
+"Please complete date and time fields"
+);
+
+return;
+
+}
+
+const payload={
+
+organization_id: Number(form.get("organizationId")),
+
+title:
+form.get(
+"title"
+),
+
+description:
+form.get(
+"description"
+),
+
+location:
+form.get(
+"location"
+),
+
+category:
+form.get(
+"category"
+),
+
+start_datetime:
+
+`${form.get("eventDate")}T${form.get("startTime")}`,
+
+end_datetime:
+
+`${form.get("eventDate")}T${form.get("endTime")}`
+
+};
+
+const response=
+await fetch(
+
+"http://localhost:5000/api/events",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":
+"application/json",
+
+Authorization:
+`Bearer ${pageToken}`
+
+},
+
+body:
+JSON.stringify(
+payload
+)
+
+}
+
+);
+
+const data=
+await response.json();
+
+alert(
+
+data.message ||
+
+data.error
+
+);
+
+if(data.message){
+
+e.target.reset();
+
+}
+
+}
+
+);
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+
+</html>

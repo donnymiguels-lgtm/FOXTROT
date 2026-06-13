@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Events - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<header class="navbar">
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="index.html"><i class="fa-solid fa-chart-line"></i><span>Dashboard</span></a>
+    <a href="organizations.html"><i class="fa-solid fa-building"></i><span>Organizations</span></a>
+    <a href="events.html" class="active"><i class="fa-solid fa-calendar"></i><span>Events</span></a>
+    <a href="my-orgs.html"><i class="fa-solid fa-user"></i><span>My Orgs</span></a>
+    <a href="my-events.html"><i class="fa-solid fa-clipboard-list"></i><span>My Events</span></a>
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge" id="roleBadge">
+      <i class="fa-solid fa-user"></i>
+      <span id="roleText">Student</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+  </div>
+</header>
+
+<main class="container">
+
+  <h1>Upcoming Events</h1>
+
+  <p class="subtitle">
+    Don't miss out on these amazing events from student organizations.
+  </p>
+
+  <div class="search-bar">
+  <input
+    id="eventSearch"
+    placeholder="Search events or organizations..."
+  />
+</div>
+
+<div class="filters">
+  <div class="filter active" data-category="all">All</div>
+  <div class="filter" data-category="workshop">Workshop</div>
+  <div class="filter" data-category="seminar">Seminar</div>
+  <div class="filter" data-category="competition">Competition</div>
+  <div class="filter" data-category="meeting">Meeting</div>
+  <div class="filter" data-category="other">Other</div>
+</div>
+
+  <div id="eventsList"></div>
+
+  <div
+    id="emptyEvents"
+    class="empty-state"
+    style="display:none;"
+  >
+    No events found.
+  </div>
+
+  <template id="eventTemplate">
+
+    <div class="card event-card">
+
+      <div class="event-left">
+
+        <div class="date-box">
+          <strong class="event-day"></strong>
+          <span class="event-month"></span>
+        </div>
+
+        <div class="event-info">
+
+          <h3 class="event-name"></h3>
+
+          <p class="event-type"></p>
+
+          <p class="event-desc"></p>
+
+          <div class="event-details">
+            <span class="event-time"></span>
+            <span class="event-location"></span>
+            <span class="event-attendees"></span>
+          </div>
+
+          <div class="event-buttons">
+            <button class="btn register-btn">Register</button>
+            <button class="btn outline learn-more-btn">Learn More</button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <span class="tag event-category"></span>
+
+    </div>
+
+  </template>
+
+</main>
+
+<script>
+
+let allEvents = [];
+let currentCategory = "all";
+
+function renderEvents(){
+
+const searchValue =
+document
+.getElementById("eventSearch")
+.value
+.toLowerCase();
+
+const container =
+document.getElementById("eventsList");
+
+const template =
+document.getElementById("eventTemplate");
+
+const empty =
+document.getElementById("emptyEvents");
+
+container.innerHTML = "";
+
+const filteredEvents =
+allEvents.filter(event=>{
+
+const title =
+String(event.title || "").toLowerCase();
+
+const organization =
+String(event.organization_name || "").toLowerCase();
+
+const category =
+String(event.category || "").toLowerCase();
+
+const description =
+String(event.description || "").toLowerCase();
+
+const matchesSearch =
+title.includes(searchValue)
+||
+organization.includes(searchValue)
+||
+category.includes(searchValue)
+||
+description.includes(searchValue);
+
+const matchesCategory =
+currentCategory === "all"
+||
+category === currentCategory;
+
+return matchesSearch && matchesCategory;
+
+});
+
+if(filteredEvents.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+filteredEvents.forEach(event=>{
+
+const clone =
+template.content.cloneNode(true);
+
+const start =
+new Date(event.start_datetime);
+
+const day =
+start.getDate();
+
+const month =
+start
+.toLocaleString(
+"default",
+{
+month:"short"
+}
+)
+.toUpperCase();
+
+clone.querySelector(".event-day").textContent =
+day;
+
+clone.querySelector(".event-month").textContent =
+month;
+
+clone.querySelector(".event-name").textContent =
+event.title;
+
+clone.querySelector(".event-type").textContent =
+event.organization_name || "Student Organization";
+
+clone.querySelector(".event-desc").textContent =
+event.description || "";
+
+clone.querySelector(".event-location").textContent =
+"📍 " + (event.location || "No location");
+
+clone.querySelector(".event-time").textContent =
+"⏰ " + start.toLocaleString();
+
+clone.querySelector(".event-attendees").textContent =
+`👥 ${event.registration_count || 0} attending`;
+
+clone.querySelector(".event-category").textContent =
+event.category || "Other";
+const card =
+clone.querySelector(".event-card");
+
+card.addEventListener("click",()=>{
+
+window.location.href =
+`event-details.html?id=${event.event_id}`;
+
+});
+
+const registerBtn =
+clone.querySelector(".register-btn");
+
+registerBtn.addEventListener("click", async(e)=>{
+
+e.preventDefault();
+
+e.stopPropagation();
+
+const token =
+localStorage.getItem("token");
+
+if(!token){
+
+alert("Please login first");
+
+return;
+
+}
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/events/${event.event_id}/register`,
+{
+method:"POST",
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+if(data.message){
+
+await loadEvents();
+
+}
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Registration failed");
+
+}
+
+});
+
+const learnMoreBtn =
+clone.querySelector(".learn-more-btn");
+
+learnMoreBtn.addEventListener("click",(e)=>{
+
+e.preventDefault();
+
+e.stopPropagation();
+
+window.location.href =
+`event-details.html?id=${event.event_id}`;
+
+});
+
+container.appendChild(clone);
+
+});
+
+}
+
+async function loadEvents(){
+
+try{
+
+const response =
+await fetch(
+"http://localhost:5000/api/events"
+);
+
+allEvents =
+await response.json();
+
+renderEvents();
+
+}
+catch(error){
+
+console.log(
+"Load events error:",
+error
+);
+
+}
+
+}
+
+document
+.getElementById("eventSearch")
+.addEventListener(
+"input",
+renderEvents
+);
+
+document
+.querySelectorAll(".filter")
+.forEach(filter=>{
+
+filter.addEventListener("click",()=>{
+
+document
+.querySelectorAll(".filter")
+.forEach(item=>
+item.classList.remove("active")
+);
+
+filter.classList.add("active");
+
+currentCategory =
+filter.dataset.category;
+
+renderEvents();
+
+});
+
+});
+
+loadEvents();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

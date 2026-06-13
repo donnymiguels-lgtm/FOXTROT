@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Members - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+
+    <a href="index.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="events.html">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+    <a href="my-orgs.html">
+      <i class="fa-solid fa-user"></i>
+      <span>My Orgs</span>
+    </a>
+
+    <a href="my-events.html">
+      <i class="fa-solid fa-clipboard-list"></i>
+      <span>My Events</span>
+    </a>
+
+    <a href="officer.html" id="officerPanelLink">
+      <i class="fa-solid fa-user-tie"></i>
+      <span>Officer Panel</span>
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+    <div class="student-badge" id="roleBadge">
+      <i class="fa-solid fa-user"></i>
+      <span id="roleText">Student</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+  </div>
+
+</header>
+
+<main class="container">
+
+  <div class="page-header">
+    <div>
+      <h1>Manage Members</h1>
+      <p class="subtitle">
+        View members, update roles, and remove members from your organization.
+      </p>
+    </div>
+
+    <a href="officer.html" class="btn outline">
+      Back to Officer Panel
+    </a>
+  </div>
+
+  <section class="card">
+
+    <h3>Organization Members</h3>
+
+    <div
+      class="empty-state"
+      id="emptyMembers"
+      style="display:none;"
+    >
+      No members found.
+    </div>
+
+    <div class="table-wrapper">
+
+      <table class="org-table">
+
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="membersTableBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+const pageToken =
+localStorage.getItem(
+"token"
+);
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const organizationId =
+params.get(
+"org"
+);
+
+let currentUserRole = null;
+
+async function loadMembers(){
+
+if(!organizationId){
+
+alert(
+"No organization selected"
+);
+
+window.location.href =
+"officer.html";
+
+return;
+
+}
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/organizations/${organizationId}/members`,
+
+{
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const members =
+await response.json();
+
+const currentUserId =
+JSON.parse(
+atob(pageToken.split(".")[1])
+).user_id;
+
+const me =
+members.find(
+member =>
+member.user_id == currentUserId
+);
+
+if(me){
+
+currentUserRole =
+me.organization_role;
+
+}
+
+if(members.error){
+
+alert(
+members.error
+);
+
+window.location.href =
+"officer.html";
+
+return;
+
+}
+
+renderMembers(
+members
+);
+
+}
+
+function renderMembers(members){
+
+const body =
+document.getElementById(
+"membersTableBody"
+);
+
+const empty =
+document.getElementById(
+"emptyMembers"
+);
+
+body.innerHTML =
+"";
+
+if(!Array.isArray(members) || members.length===0){
+
+empty.style.display =
+"block";
+
+return;
+
+}
+
+empty.style.display =
+"none";
+
+members.forEach(member=>{
+
+const currentUserId =
+JSON.parse(
+atob(pageToken.split(".")[1])
+).user_id;
+
+const isPresident =
+member.organization_role === "president";
+
+const isSelf =
+member.user_id == currentUserId;
+
+body.innerHTML += `
+
+<tr>
+
+<td>
+${member.first_name} ${member.last_name}
+</td>
+
+<td>
+${member.email}
+</td>
+
+<td>
+
+<select
+class="role-select"
+data-membership-id="${member.membership_id}"
+${
+currentUserRole !== "president"
+||
+isPresident
+?
+"disabled"
+:
+""
+}
+>
+
+<option value="president" ${member.organization_role==="president" ? "selected" : ""}>
+President
+</option>
+
+<option value="vice_president" ${member.organization_role==="vice_president" ? "selected" : ""}>
+Vice President
+</option>
+
+<option value="secretary" ${member.organization_role==="secretary" ? "selected" : ""}>
+Secretary
+</option>
+
+<option value="treasurer" ${member.organization_role==="treasurer" ? "selected" : ""}>
+Treasurer
+</option>
+
+<option value="officer" ${member.organization_role==="officer" ? "selected" : ""}>
+Officer
+</option>
+
+<option value="member" ${member.organization_role==="member" ? "selected" : ""}>
+Member
+</option>
+
+</select>
+
+</td>
+
+<td>
+${new Date(member.joined_at).toLocaleDateString()}
+</td>
+
+<td>
+
+<td>
+
+${
+(!isPresident && !isSelf && currentUserRole==="president")
+?
+
+`
+<button
+class="btn outline remove-btn"
+data-membership-id="${member.membership_id}"
+>
+Remove
+</button>
+`
+
+:
+
+""
+}
+
+${
+!isPresident
+?
+`
+${
+currentUserRole==="president"
+&&
+!isPresident
+?
+
+`
+<button
+class="btn"
+onclick="transferPresident(${member.membership_id})"
+>
+Transfer Presidency
+</button>
+`
+
+:
+
+""
+}
+`
+:
+""
+}
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+attachActions();
+
+}
+
+function attachActions(){
+
+document
+.querySelectorAll(
+".transfer-btn"
+)
+.forEach(button=>{
+
+button.addEventListener(
+
+"click",
+
+async()=>{
+
+const membershipId =
+button.dataset.membershipId;
+
+await transferPresident(
+membershipId
+);
+
+}
+
+);
+
+});
+
+document
+.querySelectorAll(
+".role-select"
+)
+.forEach(select=>{
+
+select.addEventListener(
+
+"change",
+
+async()=>{
+
+const membershipId =
+select.dataset.membershipId;
+
+const newRole =
+select.value;
+
+await updateRole(
+membershipId,
+newRole
+);
+
+}
+
+);
+
+});
+
+document
+.querySelectorAll(
+".remove-btn"
+)
+.forEach(button=>{
+
+button.addEventListener(
+
+"click",
+
+async()=>{
+
+const membershipId =
+button.dataset.membershipId;
+
+await removeMember(
+membershipId
+);
+
+}
+
+);
+
+});
+
+}
+
+async function updateRole(membershipId,newRole){
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/organizations/members/${membershipId}/role`,
+
+{
+method:"PUT",
+
+headers:{
+"Content-Type":"application/json",
+Authorization:
+`Bearer ${pageToken}`
+},
+
+body:
+JSON.stringify({
+organization_role:newRole
+})
+}
+
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadMembers();
+
+}
+
+async function removeMember(membershipId){
+
+const confirmRemove =
+confirm(
+"Remove this member from the organization?"
+);
+
+if(!confirmRemove){
+
+return;
+
+}
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/organizations/members/${membershipId}`,
+
+{
+method:"DELETE",
+
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadMembers();
+
+}
+
+async function transferPresident(
+membershipId
+){
+
+const confirmTransfer =
+confirm(
+"Transfer presidency to this member?\n\nYou will lose president privileges."
+);
+
+if(!confirmTransfer){
+
+return;
+
+}
+
+const response =
+await fetch(
+
+`http://localhost:5000/api/organizations/members/${membershipId}/transfer-president`,
+
+{
+method:"PUT",
+
+headers:{
+Authorization:
+`Bearer ${pageToken}`
+}
+}
+
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadMembers();
+
+}
+
+loadMembers();
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>

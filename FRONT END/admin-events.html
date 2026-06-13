@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Events - OrgHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  >
+</head>
+
+<body>
+
+<header class="navbar">
+
+  <div class="logo">
+    <div class="logo-icon">
+      <i class="fa-solid fa-book"></i>
+    </div>
+
+    <div class="logo-text">
+      <span class="logo-title">OrgHub</span>
+      <span class="logo-sub">Student Organizations</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+
+    <a href="admin.html">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="admin-organizations.html">
+      <i class="fa-solid fa-building"></i>
+      <span>Organizations</span>
+    </a>
+
+    <a href="admin-events.html" class="active">
+      <i class="fa-solid fa-calendar"></i>
+      <span>Events</span>
+    </a>
+
+  </nav>
+
+  <div class="nav-right">
+
+    <div class="student-badge admin-badge" id="roleBadge">
+      <i class="fa-solid fa-user-shield"></i>
+      <span id="roleText">Admin</span>
+    </div>
+
+    <div class="profile" id="profileInitials"></div>
+
+    <button
+type="button"
+class="student-badge logout-badge"
+id="logoutBtn"
+>
+<i class="fa-solid fa-right-from-bracket"></i>
+<span>Logout</span>
+</button>
+
+  </div>
+
+</header>
+
+<main class="container" id="adminEventsPage">
+
+  <h1>Event Management</h1>
+
+  <p class="subtitle">
+    Review and manage all organization events.
+  </p>
+
+  <section class="card">
+
+    <div class="org-controls" id="eventControls">
+
+      <div class="tabs">
+
+        <button
+          class="tab active"
+          data-status="pending"
+          id="pendingTab"
+        >
+          Pending (<span id="pendingCount">0</span>)
+        </button>
+
+        <button
+          class="tab"
+          data-status="approved"
+          id="approvedTab"
+        >
+          Approved (<span id="approvedCount">0</span>)
+        </button>
+
+        <button
+          class="tab"
+          data-status="rejected"
+          id="rejectedTab"
+        >
+          Rejected (<span id="rejectedCount">0</span>)
+        </button>
+
+      </div>
+
+      <div class="search-box">
+
+        <i class="fa-solid fa-search"></i>
+
+        <input
+          type="text"
+          id="searchEventInput"
+          placeholder="Search events..."
+        >
+
+      </div>
+
+    </div>
+
+    <div class="table-wrapper">
+
+      <table class="org-table">
+
+        <thead>
+
+          <tr>
+            <th>Event Title</th>
+            <th>Organization</th>
+            <th>Event Date</th>
+            <th>Submitted By</th>
+            <th>Submit Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="eventTableBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+
+const token =
+localStorage.getItem("token");
+
+let currentStatus =
+"pending";
+
+let currentEvents =
+[];
+
+document
+.querySelectorAll(".tab")
+.forEach(tab=>{
+
+tab.addEventListener("click",()=>{
+
+document
+.querySelectorAll(".tab")
+.forEach(t=>
+t.classList.remove("active")
+);
+
+tab.classList.add("active");
+
+currentStatus =
+tab.dataset.status;
+
+loadEvents();
+
+});
+
+});
+
+document
+.getElementById("searchEventInput")
+.addEventListener("input",()=>{
+
+renderEvents();
+
+});
+
+async function loadEvents(){
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/events/requests?status=${currentStatus}`,
+{
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+);
+
+currentEvents =
+await response.json();
+
+await updateCounts();
+
+renderEvents();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Failed loading events");
+
+}
+
+}
+
+function renderEvents(){
+
+const searchValue =
+document
+.getElementById("searchEventInput")
+.value
+.toLowerCase();
+
+const body =
+document.getElementById("eventTableBody");
+
+body.innerHTML =
+"";
+
+const filteredEvents =
+currentEvents.filter(event=>{
+
+const title =
+String(event.title || "")
+.toLowerCase();
+
+const organization =
+String(event.organization_name || "")
+.toLowerCase();
+
+const submittedBy =
+String(event.created_by || "")
+.toLowerCase();
+
+const status =
+String(event.status || "")
+.toLowerCase();
+
+const category =
+String(event.category || "")
+.toLowerCase();
+
+return (
+title.includes(searchValue)
+||
+organization.includes(searchValue)
+||
+submittedBy.includes(searchValue)
+||
+status.includes(searchValue)
+||
+category.includes(searchValue)
+);
+
+});
+
+if(
+!Array.isArray(filteredEvents)
+||
+filteredEvents.length===0
+){
+
+body.innerHTML =
+`
+<tr>
+  <td colspan="7">
+    No events found.
+  </td>
+</tr>
+`;
+
+return;
+
+}
+
+filteredEvents.forEach(event=>{
+
+body.innerHTML +=
+`
+<tr>
+
+  <td>
+    <i class="fa-regular fa-calendar"></i>
+    ${event.title}
+  </td>
+
+  <td>
+    <span class="tag">
+      ${event.organization_name || "Unknown"}
+    </span>
+  </td>
+
+  <td>
+    ${new Date(event.start_datetime).toLocaleDateString()}
+  </td>
+
+  <td>
+    ${event.first_name} ${event.last_name}
+  </td>
+
+  <td>
+    ${new Date(event.created_at).toLocaleDateString()}
+  </td>
+
+  <td>
+    <span class="status ${event.status}">
+      ${event.status}
+    </span>
+  </td>
+
+  <td>
+
+<button
+class="link-btn"
+onclick="
+window.location.href=
+'admin-event-details.html?id=${event.event_id}'
+"
+>
+
+<i class="fa-solid fa-eye"></i>
+
+Review
+
+</button>
+
+${
+event.status === "pending"
+?
+`
+<button
+class="btn approve"
+onclick="approveEvent(${event.event_id})"
+>
+Approve
+</button>
+
+<button
+class="btn decline"
+onclick="rejectEvent(${event.event_id})"
+>
+Reject
+</button>
+`
+:
+""
+}
+
+</td>
+
+</tr>
+`;
+
+});
+
+}
+
+async function updateCounts(){
+
+const statuses =
+[
+"pending",
+"approved",
+"rejected"
+];
+
+for(const status of statuses){
+
+const response =
+await fetch(
+`http://localhost:5000/api/events/requests?status=${status}`,
+{
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+);
+
+const data =
+await response.json();
+
+document.getElementById(
+`${status}Count`
+).textContent =
+Array.isArray(data)
+?
+data.length
+:
+0;
+
+}
+
+}
+
+async function approveEvent(id){
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/events/${id}/approve`,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadEvents();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Event approval failed");
+
+}
+
+}
+
+async function rejectEvent(id){
+
+try{
+
+const response =
+await fetch(
+`http://localhost:5000/api/events/${id}/reject`,
+{
+method:"PUT",
+headers:{
+Authorization:
+`Bearer ${token}`
+}
+}
+);
+
+const data =
+await response.json();
+
+alert(
+data.message ||
+data.error
+);
+
+loadEvents();
+
+}
+catch(error){
+
+console.log(error);
+
+alert("Event rejection failed");
+
+}
+
+}
+
+loadEvents();
+
+
+document
+.getElementById("logoutBtn")
+.addEventListener("click",()=>{
+
+const confirmLogout =
+confirm("Logout from OrgHub?");
+
+if(!confirmLogout){
+return;
+}
+
+localStorage.removeItem("token");
+
+window.location.replace(
+"login.html"
+);
+
+});
+</script>
+
+<script src="auth-ui.js"></script>
+
+</body>
+</html>
